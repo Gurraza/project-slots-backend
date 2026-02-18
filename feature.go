@@ -12,8 +12,7 @@ type GameFeature interface {
 }
 
 type BaseFeature struct {
-	Type      string
-	GameState *GameState
+	Type string
 }
 
 // --- Implementing the Interface Methods ---
@@ -25,7 +24,7 @@ func (f *BaseFeature) Init() {
 // GetSymbols: Returns the symbols this feature uses
 func (f *BaseFeature) GetSymbols() []SymbolDef {
 	// Assuming your Config has a list of all symbols
-	return f.GameState.Config.Symbols
+	return []SymbolDef{}
 }
 
 // OnSpinStart: Reset state before the reels move

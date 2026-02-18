@@ -1,9 +1,10 @@
 package main
 
 type GameConfig struct {
-	Cols    int
-	Rows    int
-	Symbols []SymbolDef
+	Cols     int
+	Rows     int
+	Symbols  []SymbolDef
+	Features []GameFeature
 }
 
 type SymbolDef struct {
@@ -34,7 +35,6 @@ type GameState struct {
 	Config   *GameConfig
 	RNG      RNG
 	Timeline []TimelineEvent
-	Features []GameFeature
 }
 
 func NewGameState(config *GameConfig, seed int64) *GameState {
@@ -43,7 +43,6 @@ func NewGameState(config *GameConfig, seed int64) *GameState {
 		Config:   config,
 		RNG:      NewGoRNG(seed), // Initialize with the specific seed
 		Timeline: make([]TimelineEvent, 0),
-		Features: []GameFeature{},
 	}
 }
 
@@ -55,40 +54,35 @@ func PlayRound(gameState *GameState) []TimelineEvent {
 		WinAmount:    0,
 	})
 
-	for i := range gameState.Features {
-		gameState.Features[i].OnSpinStart(gameState)
+	for _, f := range gameState.Config.Features {
+		f.OnSpinStart(gameState)
 	}
+
 	count := 0
 	for {
-		if count > 20 {
+		actionOccured := false
+		if count > 50 {
 			break
 		}
 
-		cluster := FindClusters(*gameState.Grid, gameState.Config.Symbols)
-		mergedCluster := make([]Point, 0)
-		for _, c := range cluster {
-			mergedCluster = append(mergedCluster, c...)
-		}
-		if len(mergedCluster) == 0 {
-			break
+		for _, f := range gameState.Config.Features {
+			actionOccured = f.OnGridEvaluate(gameState)
 		}
 
-		replacements := make([]int, len(mergedCluster))
-		for i := range replacements {
-			replacements[i] = gameState.RNG.GetRandomSymbol(gameState).ID
+		if !actionOccured {
+			for _, f := range gameState.Config.Features {
+				actionOccured = f.OnGridIdle(gameState)
+			}
 		}
-		gameState.Grid, _ = ExplodeAndCascade(*gameState.Grid, mergedCluster, replacements)
 
-		gameState.Timeline = append(gameState.Timeline, TimelineEvent{
-			Type:         "ExplodeAndCascade",
-			GridSnapshot: gameState.Grid.Copy(),
-			WinAmount:    0,
-			Meta: map[string]interface{}{
-				"points":       mergedCluster,
-				"replacements": replacements,
-			},
-		})
 		count += 1
+		if !actionOccured {
+			break
+		}
+	}
+
+	for _, f := range gameState.Config.Features {
+		f.OnSpinEnd(gameState)
 	}
 
 	gameState.Timeline = append(gameState.Timeline, TimelineEvent{

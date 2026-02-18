@@ -11,11 +11,10 @@ type PaylineFeature struct {
 
 var _ GameFeature = (*PaylineFeature)(nil)
 
-func NewPaylineFeature(roundSession *GameState) *PaylineFeature {
+func NewPaylineFeature() *PaylineFeature {
 	return &PaylineFeature{
 		BaseFeature: BaseFeature{
-			Type:      "PAYLINES_FEATURE",
-			GameState: roundSession,
+			Type: "PAYLINES_FEATURE",
 		},
 		Paylines: GetPaylines(),
 	}
@@ -26,7 +25,7 @@ func (f *PaylineFeature) OnGridIdle(session *GameState) bool {
 	roundWin := 0.0
 
 	for _, linePath := range f.Paylines {
-		result := f.checkLine(*session.Grid, linePath)
+		result := f.checkLine(*session.Grid, linePath, session.Config.Symbols)
 		if result != nil {
 			winningLines = append(winningLines, result)
 			roundWin += result.Payout
@@ -58,7 +57,7 @@ type LineCheckResult struct {
 	Symbol string  `json:"symbol"`
 }
 
-func (f *PaylineFeature) checkLine(grid Grid, linePath []int) *LineCheckResult {
+func (f *PaylineFeature) checkLine(grid Grid, linePath []int, allSymbols []SymbolDef) *LineCheckResult {
 	if len(linePath) != len(grid.Cells) {
 		return nil
 	}
@@ -85,8 +84,8 @@ func (f *PaylineFeature) checkLine(grid Grid, linePath []int) *LineCheckResult {
 		}
 	}
 
-	if matchCount >= 3 {
-		symbolDef := f.GameState.Config.Symbols[firstSymbol]
+	if matchCount >= 2 {
+		symbolDef := allSymbols[firstSymbol]
 		payout := symbolDef.Payouts[matchCount]
 
 		coords := make([]Point, matchCount)

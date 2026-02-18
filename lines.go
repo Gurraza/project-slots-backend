@@ -1,5 +1,7 @@
 package main
 
+import "math/rand"
+
 func LoadLinesConfig() *GameConfig {
 	return &GameConfig{
 		Cols: 5,
@@ -13,5 +15,21 @@ func LoadLinesConfig() *GameConfig {
 			{ID: 2, Name: "strawberry", Weight: []int{15}, Payouts: []float64{0, 0, 5, 50, 500}},
 			{ID: 6, Name: "cherry", Weight: []int{60}, Payouts: []float64{0, 0, 1, 8, 40}},
 		},
+		Features: []GameFeature{
+			NewClusterFeature(),
+			NewPaylineFeature(),
+		},
 	}
+}
+func PlayLines() []TimelineEvent {
+	seed := rand.Int63()
+	gameState := NewGameState(LoadLinesConfig(), seed)
+	// gameState.Config.Features = append(gameState.Config.Features, NewPaylineFeature(gameState))
+	var timeline []TimelineEvent = PlayRound(gameState)
+	// clusters := FindClusters(*timeline[0].GridSnapshot, gameState.Config.Symbols)
+	// for _, cluster := range clusters {
+	// 	clusterJSON, _ := json.MarshalIndent(cluster, "", "  ")
+	// 	fmt.Println(string(clusterJSON))
+	// }
+	return timeline
 }

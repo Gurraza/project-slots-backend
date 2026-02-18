@@ -23,29 +23,15 @@ func randomNumberHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func playEndpointHandler(w http.ResponseWriter, r *http.Request) {
+func PlayLinesEndpointHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	timeline := PlayLines()
-	fmt.Println(timeline)
 	json.NewEncoder(w).Encode(timeline)
-}
-
-func PlayLines() []TimelineEvent {
-	seed := rand.Int63()
-	gameState := NewGameState(LoadLinesConfig(), seed)
-	gameState.Features = append(gameState.Features, NewPaylineFeature(gameState))
-	var timeline []TimelineEvent = PlayRound(gameState)
-	// clusters := FindClusters(*timeline[0].GridSnapshot, gameState.Config.Symbols)
-	// for _, cluster := range clusters {
-	// 	clusterJSON, _ := json.MarshalIndent(cluster, "", "  ")
-	// 	fmt.Println(string(clusterJSON))
-	// }
-	return timeline
 }
 
 func main() {
 	http.HandleFunc("/api/random", randomNumberHandler)
-	http.HandleFunc("/api/play", playEndpointHandler)
+	http.HandleFunc("/api/play/lines", PlayLinesEndpointHandler)
 
 	fmt.Println("Go server running on http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
