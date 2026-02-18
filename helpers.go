@@ -1,6 +1,6 @@
 package main
 
-func GetRandomSymbolID(*RoundSession) int {
+func GetRandomSymbolID(*GameState) int {
 
 	return 0
 }

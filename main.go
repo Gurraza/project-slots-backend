@@ -23,8 +23,19 @@ func randomNumberHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func playHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	seed := rand.Int63()
+	gameState := NewGameState(&GameConfig{Cols: 5, Rows: 3, Symbols: []SymbolDef{}}, seed)
+	gameState.Features = append(gameState.Features, NewPaylineFeature(gameState))
+	var timeline []TimelineEvent = PlayRound(gameState)
+	fmt.Println(timeline)
+	json.NewEncoder(w).Encode(timeline)
+}
+
 func main() {
 	http.HandleFunc("/api/random", randomNumberHandler)
+	http.HandleFunc("/api/play", playHandler)
 
 	fmt.Println("Go server running on http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

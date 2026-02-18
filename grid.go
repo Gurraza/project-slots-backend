@@ -22,3 +22,14 @@ func (g *Grid) Copy() *Grid {
 	}
 	return &Grid{Cols: g.Cols, Rows: g.Rows, Cells: newCells}
 }
+
+func GetPaylines() [][]int {
+	// Classic 5-reel, 3-row paylines
+	return [][]int{
+		{1, 1, 1, 1, 1}, // Line 1: middle
+		{0, 0, 0, 0, 0}, // Line 2: top
+		{2, 2, 2, 2, 2}, // Line 3: bottom
+		{0, 1, 2, 1, 0}, // Line 4: V-shaped
+		{2, 1, 0, 1, 2}, // Line 5: inverted V
+	}
+}
