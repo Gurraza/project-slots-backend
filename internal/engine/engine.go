@@ -18,7 +18,7 @@ type GameConfig struct {
 type GameState struct {
 	Grid     *grid.Grid
 	Config   *GameConfig
-	Symbols  []*symbol.SymbolDef
+	Symbols  map[int]*symbol.SymbolDef
 	RNG      rng.RNG
 	Timeline []*timeline.TimelineEvent
 }
@@ -28,27 +28,29 @@ func (g *GameState) GetGrid() *grid.Grid {
 }
 
 func (g *GameState) AddSymbol(s *symbol.SymbolDef) {
-	g.Config.Symbols = append(g.Config.Symbols, s)
+	if g.Symbols[s.ID] != nil {
+		panic("Tried to add a symbol with id that already exists")
+	}
+	g.Symbols[s.ID] = s
 }
 
-func (g *GameState) GetSymbols() []*symbol.SymbolDef {
-	return g.Config.Symbols
+func (g *GameState) GetSymbols() map[int]*symbol.SymbolDef {
+	return g.Symbols
 }
 
 func (gs *GameState) GetRandomSymbol(grid *grid.Grid, col int, row int) *symbol.SymbolDef {
 	weightContext := symbol.WeightContext{
 		ReelIndex: col,
 		RowIndex:  row,
-		SymbolDef: nil,
 		Grid:      grid,
 	}
 	totalWeight := 0
-	for i := range gs.Config.Symbols {
-		totalWeight += gs.Config.Symbols[i].GetWeight(&weightContext)
+	for _, s := range gs.Symbols {
+		totalWeight += s.GetWeight(&weightContext)
 	}
 	randomNmr := gs.RNG.Range(totalWeight)
 
-	for _, s := range gs.Config.Symbols {
+	for _, s := range gs.Symbols {
 		w := s.GetWeight(&weightContext)
 		if randomNmr < w {
 			return s
@@ -57,7 +59,7 @@ func (gs *GameState) GetRandomSymbol(grid *grid.Grid, col int, row int) *symbol.
 	}
 	panic("GET RANDOM SYMBOL DIDN't RETURN ANYTHING CORRECT")
 	// will never happen
-	// return gs.Config.Symbols[0]
+	// return gs.Symbols[0]
 }
 
 func (g *GameState) PushTimeline(e *timeline.TimelineEvent) {
@@ -74,10 +76,15 @@ func (g *GameState) SetGrid(newGrid *grid.Grid) {
 }
 
 func NewGameState(config *GameConfig, seed int64) *GameState {
+	symbs := make(map[int]*symbol.SymbolDef, len(config.Symbols))
+	for _, s := range config.Symbols {
+		symbs[s.ID] = s
+	}
 	return &GameState{
 		Grid:     grid.NewGrid(config.Cols, config.Rows),
 		Config:   config,
 		RNG:      rng.NewGoRNG(seed), // Initialize with the specific seed
+		Symbols:  symbs,
 		Timeline: make([]*timeline.TimelineEvent, 0),
 	}
 }
@@ -157,4 +164,13 @@ func GenerateRandomGrid(gameState *GameState) *grid.Grid {
 	}
 
 	return newGrid
+}
+
+func (g *GameState) GetSymbol(id int) *symbol.SymbolDef {
+	for _, s := range g.Symbols {
+		if s.ID == id {
+			return s
+		}
+	}
+	return nil
 }

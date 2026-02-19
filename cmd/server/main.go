@@ -37,17 +37,23 @@ func main() {
 	// if err := http.ListenAndServe(":8080", nil); err != nil {
 	// 	panic(err)
 	// }
-	for range 100 {
-		gameState := engine.NewGameState(linesGameConfig, rand.Int63())
+	for range 1 {
+		seed := rand.Int63()
+		fmt.Println("\nSeed:", seed)
+		gameState := engine.NewGameState(linesGameConfig, seed)
 		t := gameState.PlayRound()
-		fmt.Println(t[len(t)-1].TotalWinAmount)
-		//PrintTimeline(t)
+		PrintTimeline(t)
+		fmt.Println()
 	}
 }
 func PrintTimeline(t []*timeline.TimelineEvent) {
-	fmt.Printf("\n\nEvents: %d Total Win Amount %f \n", len(t), t[len(t)-1].TotalWinAmount)
+	fmt.Printf("Events: %d Total Win Amount %.2f \n", len(t), t[len(t)-1].TotalWinAmount)
 	for i, e := range t {
-		fmt.Printf("Grid %d type "+e.Type+" win amount %f\n", i, e.WinAmount)
+		fmt.Printf("Grid %d type "+e.Type+" win amount %.2f\n", i, e.WinAmount)
+
+		if e.Meta != nil {
+			fmt.Printf("Lines %+V\n", e.Meta)
+		}
 
 		g := e.GridSnapshot.Cells
 		if len(g) == 0 {

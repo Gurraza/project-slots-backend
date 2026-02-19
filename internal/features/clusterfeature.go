@@ -54,10 +54,10 @@ func (f *ClusterFeature) OnGridIdle(ctx FeatureContext) bool {
 	return true
 }
 
-func FindClusters(g *grid.Grid, defs []*symbol.SymbolDef) []Cluster {
+func FindClusters(g *grid.Grid, symbols map[int]*symbol.SymbolDef) []Cluster {
 	// 1. Build a lookup map for efficient SymbolDef access by ID
 	defMap := make(map[int]*symbol.SymbolDef)
-	for _, d := range defs {
+	for _, d := range symbols {
 		defMap[d.ID] = d
 	}
 

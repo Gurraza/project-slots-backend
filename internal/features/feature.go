@@ -9,7 +9,7 @@ import (
 type FeatureContext interface {
 	GetGrid() *grid.Grid
 	SetGrid(*grid.Grid)
-	GetSymbols() []*symbol.SymbolDef
+	GetSymbols() map[int]*symbol.SymbolDef
 	AddSymbol(symbolDef *symbol.SymbolDef)
 	GetRandomSymbol(grid *grid.Grid, col int, row int) *symbol.SymbolDef
 	PushTimeline(timelineEvent *timeline.TimelineEvent)

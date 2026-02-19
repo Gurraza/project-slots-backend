@@ -1,6 +1,8 @@
 package symbol
 
-import "slots/internal/grid"
+import (
+	"slots/internal/grid"
+)
 
 type SymbolDef struct {
 	ID           int
@@ -11,7 +13,7 @@ type SymbolDef struct {
 }
 
 type WeightModifier interface {
-	Apply(currentWeight int, ctx *WeightContext) int
+	Apply(currentWeight int, ctx *WeightContext, s *SymbolDef) int
 }
 
 type WeightConfig struct {
@@ -22,20 +24,17 @@ type WeightConfig struct {
 type WeightContext struct {
 	ReelIndex int
 	RowIndex  int
-	SymbolDef *SymbolDef
 	Grid      *grid.Grid
 }
 
 func (s *SymbolDef) GetWeight(ctx *WeightContext) int {
 	w := s.WeightConfig.FixedWeight
-	ctx.SymbolDef = s
 	for _, mod := range s.WeightConfig.Modifiers {
-		w = mod.Apply(w, ctx)
+		w = mod.Apply(w, ctx, s)
 		if w <= 0 {
 			return 0
 		}
 	}
-
 	return w
 }
 
@@ -45,7 +44,7 @@ type CountWeight struct {
 	Scales []int
 }
 
-func (m *CountWeight) Apply(currentWeight int, ctx *WeightContext) int {
+func (m *CountWeight) Apply(currentWeight int, ctx *WeightContext, symbolDef *SymbolDef) int {
 	// 1. Get how many times this symbol has already spawned
 	// (You would pass the SymbolID into the modifier or Context,
 	// strictly speaking the modifier might need to know which symbol it belongs to,
@@ -54,10 +53,8 @@ func (m *CountWeight) Apply(currentWeight int, ctx *WeightContext) int {
 	// Let's assume the Context tracks the ID we are currently calculating for.
 
 	// NOTE: In a real engine, you'd pass the target SymbolID to Apply as well.
-	if ctx.SymbolDef == nil {
-		return currentWeight
-	}
-	count := len(ctx.Grid.Contain(ctx.SymbolDef.ID))
+
+	count := len(ctx.Grid.Contain(symbolDef.ID))
 
 	if count >= len(m.Scales) {
 		// Fallback: If we exceed the array, use the last value or 0?
@@ -78,7 +75,7 @@ type ReelWeight struct {
 	ReelMultipliers []int
 }
 
-func (m *ReelWeight) Apply(currentWeight int, ctx *WeightContext) int {
+func (m *ReelWeight) Apply(currentWeight int, ctx *WeightContext, symbolDef *SymbolDef) int {
 	if ctx.ReelIndex >= len(m.ReelMultipliers) {
 		return currentWeight // Safe fallback
 	}
@@ -95,13 +92,14 @@ type SameReelWeight struct {
 	Factor         int // e.g. 50 for 50%
 }
 
-func (m *SameReelWeight) Apply(currentWeight int, ctx *WeightContext) int {
+func (m *SameReelWeight) Apply(currentWeight int, ctx *WeightContext, symbolDef *SymbolDef) int {
 	// Check if the target symbol is already in the current reel's generated column
 	// (Assuming GridState is populated row by row or col by col)
 	present := false
-	for i := range ctx.Grid.Cells {
-		if ctx.Grid.Get(ctx.ReelIndex, i) == m.TargetSymbolID {
+	for row := 0; row < ctx.Grid.Rows; row++ {
+		if ctx.Grid.Get(ctx.ReelIndex, row) == m.TargetSymbolID {
 			present = true
+			break
 		}
 	}
 
@@ -109,4 +107,40 @@ func (m *SameReelWeight) Apply(currentWeight int, ctx *WeightContext) int {
 		return (currentWeight * m.Factor) / 100
 	}
 	return currentWeight
+}
+
+func (s1 *SymbolDef) Compatible(s2 *SymbolDef) bool {
+	if s1 == nil || s2 == nil {
+		return false
+	}
+
+	// Same symbol always matches
+	if s1.ID == s2.ID {
+		return true
+	}
+
+	// Check if s1 allows s2
+	for _, name := range s1.MatchesWith {
+		if name == s2.Name || name == "*" {
+			return true
+		}
+	}
+
+	// Check if s2 allows s1 (the missing half today)
+	for _, name := range s2.MatchesWith {
+		if name == s1.Name || name == "*" {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *SymbolDef) IsWild() bool {
+	for _, m := range s.MatchesWith {
+		if m == "*" {
+			return true
+		}
+	}
+	return false
 }

@@ -3,7 +3,6 @@ package engine
 import (
 	"encoding/json"
 	"errors"
-
 	"slots/internal/features"
 	"slots/internal/symbol"
 )
@@ -43,11 +42,6 @@ type jsonFeatureDTO struct {
 	TargetSymbolID int    `json:"TargetSymbolID,omitempty"`
 }
 
-// --- 2. The Loader Function ---
-
-// LoadGameFromJSON takes raw JSON bytes and an optional seed.
-
-// LoadConfigFromJSON parses the raw JSON bytes into a reusable GameConfig template.
 func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 	var dto jsonConfigDTO
 	if err := json.Unmarshal(jsonData, &dto); err != nil {
@@ -104,6 +98,8 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 				return nil, errors.New("WILD_FEATURE references missing symbol ID")
 			}
 			config.Features = append(config.Features, features.NewWildFeature(targetSym))
+		case "PAYLINES_FEATURE":
+			config.Features = append(config.Features, features.NewPaylineFeature())
 		}
 	}
 

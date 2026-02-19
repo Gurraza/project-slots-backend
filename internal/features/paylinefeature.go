@@ -1,7 +1,6 @@
 package features
 
 import (
-	"encoding/json"
 	"slots/internal/grid"
 	"slots/internal/symbol"
 	"slots/internal/timeline"
@@ -22,7 +21,7 @@ func NewPaylineFeature() *PaylineFeature {
 }
 
 func (f *PaylineFeature) OnGridIdle(ctx FeatureContext) bool {
-	var winningLines []interface{}
+	var winningLines []*LineCheckResult
 	roundWin := 0.0
 
 	for _, linePath := range f.Paylines {
@@ -34,15 +33,15 @@ func (f *PaylineFeature) OnGridIdle(ctx FeatureContext) bool {
 	}
 
 	if len(winningLines) > 0 {
-		eventData := map[string]interface{}{
-			"lines": winningLines,
-		}
-		extraData, _ := json.Marshal(eventData)
+		// eventData := map[string]interface{}{
+		// 	"lines": winningLines,
+		// }
+		// extraData, _ := json.Marshal(eventData)
 		ctx.PushTimeline(&timeline.TimelineEvent{
 			Type:         f.Type,
 			GridSnapshot: ctx.GetGrid().Copy(),
-			WinAmount:    0,
-			Meta:         extraData,
+			WinAmount:    roundWin,
+			Meta:         winningLines,
 		})
 	}
 
@@ -67,36 +66,55 @@ type LineCheckResult struct {
 	Symbol string       `json:"symbol"`
 }
 
-func (f *PaylineFeature) checkLine(g *grid.Grid, linePath []int, allSymbols []*symbol.SymbolDef) *LineCheckResult {
-	if len(linePath) != len(g.Cells) {
+func (f *PaylineFeature) checkLine(g *grid.Grid, linePath []int, symbols map[int]*symbol.SymbolDef) *LineCheckResult {
+
+	if len(linePath) != g.Cols {
 		return nil
 	}
 
-	symbols := make([]int, len(linePath))
+	symbolInLine := make([]*symbol.SymbolDef, len(linePath))
 	for col, row := range linePath {
-		if col >= len(g.Cells) || row >= len(g.Cells[col]) {
-			return nil
-		}
-		symbols[col] = g.Cells[col][row]
+		idHere := g.Get(col, row)
+		symbHere := symbols[idHere]
+		symbolInLine[col] = symbHere
 	}
 
-	firstSymbol := symbols[0]
-	if firstSymbol == 0 {
-		return nil
+	var baseSymbol *symbol.SymbolDef
+
+	for _, s := range symbolInLine {
+		if !s.IsWild() {
+			baseSymbol = s
+			break
+		}
+	}
+
+	// All wild line → treat wild as base
+	if baseSymbol == nil {
+		baseSymbol = symbolInLine[0]
 	}
 
 	matchCount := 1
-	for i := 1; i < len(symbols); i++ {
-		if symbols[i] == firstSymbol {
+	for i := 1; i < len(symbolInLine); i++ {
+		s := symbolInLine[i]
+		if baseSymbol.Compatible(s) {
 			matchCount++
 		} else {
 			break
 		}
 	}
-
+	// Add if it is a mix of different symbolDefs have payout be the lowest
+	// kanske fixat redan?
 	if matchCount >= 3 {
-		symbolDef := allSymbols[firstSymbol]
-		payout := symbolDef.Payouts[matchCount-1]
+		payout := baseSymbol.Payouts[matchCount-1]
+		payoutSymbol := baseSymbol
+
+		for i := 0; i < matchCount; i++ {
+			s := symbolInLine[i]
+			if s.Payouts[matchCount-1] > payout {
+				payout = s.Payouts[matchCount-1]
+				payoutSymbol = s
+			}
+		}
 
 		coords := make([]grid.Point, matchCount)
 		for i := 0; i < matchCount; i++ {
@@ -106,7 +124,7 @@ func (f *PaylineFeature) checkLine(g *grid.Grid, linePath []int, allSymbols []*s
 		return &LineCheckResult{
 			Coords: coords,
 			Payout: payout,
-			Symbol: symbolDef.Name,
+			Symbol: payoutSymbol.Name,
 		}
 
 	}

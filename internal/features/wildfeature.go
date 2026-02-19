@@ -17,5 +17,5 @@ func NewWildFeature(s *symbol.SymbolDef) *WildFeature {
 }
 
 func (f *WildFeature) Init(ctx FeatureContext) {
-	ctx.AddSymbol(f.FeatureSymbol)
+	// ctx.AddSymbol(f.FeatureSymbol)
 }
