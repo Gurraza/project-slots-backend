@@ -52,7 +52,7 @@ func PrintTimeline(t []*timeline.TimelineEvent) {
 		fmt.Printf("Grid %d type "+e.Type+" win amount %.2f\n", i, e.WinAmount)
 
 		if e.Meta != nil {
-			fmt.Printf("Lines %+V\n", e.Meta)
+			fmt.Println(e.Meta)
 		}
 
 		g := e.GridSnapshot.Cells

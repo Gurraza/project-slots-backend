@@ -19,7 +19,17 @@ func (g *Grid) Get(x int, y int) int {
 	if x >= 0 && x < g.Cols && y >= 0 && y < g.Rows {
 		return g.Cells[x][y]
 	} else {
-		return -1
+		panic("Called Grid.Get with parameters that are outside of the grid")
+	}
+}
+
+func (g *Grid) Set(x int, y int, value int) int {
+	if x >= 0 && x < g.Cols && y >= 0 && y < g.Rows {
+		before := g.Cells[x][y]
+		g.Cells[x][y] = value
+		return before
+	} else {
+		panic("Called Grid.Set with parameters that are outside of the grid")
 	}
 }
 

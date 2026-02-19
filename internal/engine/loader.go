@@ -100,6 +100,8 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 			config.Features = append(config.Features, features.NewWildFeature(targetSym))
 		case "PAYLINES_FEATURE":
 			config.Features = append(config.Features, features.NewPaylineFeature())
+		case "EXPANDING_WILDS_FEATURE":
+			config.Features = append(config.Features, features.NewExpandingWildsFeature(fDTO.TargetSymbolID))
 		}
 	}
 
