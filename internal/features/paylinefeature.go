@@ -1,15 +1,16 @@
-package main
+package features
 
 import (
 	"encoding/json"
+	"slots/internal/grid"
+	"slots/internal/symbol"
+	"slots/internal/timeline"
 )
 
 type PaylineFeature struct {
 	BaseFeature
 	Paylines [][]int
 }
-
-var _ GameFeature = (*PaylineFeature)(nil)
 
 func NewPaylineFeature() *PaylineFeature {
 	return &PaylineFeature{
@@ -20,12 +21,12 @@ func NewPaylineFeature() *PaylineFeature {
 	}
 }
 
-func (f *PaylineFeature) OnGridIdle(session *GameState) bool {
+func (f *PaylineFeature) OnGridIdle(ctx FeatureContext) bool {
 	var winningLines []interface{}
 	roundWin := 0.0
 
 	for _, linePath := range f.Paylines {
-		result := f.checkLine(*session.Grid, linePath, session.Config.Symbols)
+		result := f.checkLine(ctx.GetGrid(), linePath, ctx.GetSymbols())
 		if result != nil {
 			winningLines = append(winningLines, result)
 			roundWin += result.Payout
@@ -37,37 +38,46 @@ func (f *PaylineFeature) OnGridIdle(session *GameState) bool {
 			"lines": winningLines,
 		}
 		extraData, _ := json.Marshal(eventData)
-
-		session.Timeline = append(session.Timeline, TimelineEvent{
+		ctx.PushTimeline(&timeline.TimelineEvent{
 			Type:         f.Type,
-			GridSnapshot: session.Grid.Copy(),
+			GridSnapshot: ctx.GetGrid().Copy(),
 			WinAmount:    0,
 			Meta:         extraData,
 		})
-		return false
 	}
 
 	return false
 }
 
-type LineCheckResult struct {
-	LineID int     `json:"lineId"`
-	Coords []Point `json:"coords"`
-	Payout float64 `json:"payout"`
-	Symbol string  `json:"symbol"`
+func GetPaylines() [][]int {
+	// Classic 5-reel, 3-row paylines
+	return [][]int{
+		{1, 1, 1, 1, 1}, // Line 1: middle
+		{0, 0, 0, 0, 0}, // Line 2: top
+		{2, 2, 2, 2, 2}, // Line 3: bottom
+		{0, 1, 2, 1, 0}, // Line 4: V-shaped
+		{2, 1, 0, 1, 2}, // Line 5: inverted V
+	}
 }
 
-func (f *PaylineFeature) checkLine(grid Grid, linePath []int, allSymbols []SymbolDef) *LineCheckResult {
-	if len(linePath) != len(grid.Cells) {
+type LineCheckResult struct {
+	LineID int          `json:"lineId"`
+	Coords []grid.Point `json:"coords"`
+	Payout float64      `json:"payout"`
+	Symbol string       `json:"symbol"`
+}
+
+func (f *PaylineFeature) checkLine(g *grid.Grid, linePath []int, allSymbols []*symbol.SymbolDef) *LineCheckResult {
+	if len(linePath) != len(g.Cells) {
 		return nil
 	}
 
 	symbols := make([]int, len(linePath))
 	for col, row := range linePath {
-		if col >= len(grid.Cells) || row >= len(grid.Cells[col]) {
+		if col >= len(g.Cells) || row >= len(g.Cells[col]) {
 			return nil
 		}
-		symbols[col] = grid.Cells[col][row]
+		symbols[col] = g.Cells[col][row]
 	}
 
 	firstSymbol := symbols[0]
@@ -84,13 +94,13 @@ func (f *PaylineFeature) checkLine(grid Grid, linePath []int, allSymbols []Symbo
 		}
 	}
 
-	if matchCount >= 2 {
+	if matchCount >= 3 {
 		symbolDef := allSymbols[firstSymbol]
-		payout := symbolDef.Payouts[matchCount]
+		payout := symbolDef.Payouts[matchCount-1]
 
-		coords := make([]Point, matchCount)
+		coords := make([]grid.Point, matchCount)
 		for i := 0; i < matchCount; i++ {
-			coords[i] = Point{X: i, Y: linePath[i]}
+			coords[i] = grid.Point{X: i, Y: linePath[i]}
 		}
 
 		return &LineCheckResult{

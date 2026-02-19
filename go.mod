@@ -1,3 +1,3 @@
-module github.com/gurraza/project-slots-backend
+module slots
 
 go 1.25.0
