@@ -91,6 +91,9 @@ func NewGameState(config *GameConfig, seed int64) *GameState {
 
 func (gameState *GameState) PlayRound() []*timeline.TimelineEvent {
 	for _, f := range gameState.Config.Features {
+		for _, s := range f.GetSymbols(gameState) {
+			gameState.AddSymbol(s)
+		}
 		f.Init(gameState)
 	}
 

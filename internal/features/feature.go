@@ -23,6 +23,7 @@ type GameFeature interface {
 	OnGridEvaluate(FeatureContext) bool
 	OnGridIdle(FeatureContext) bool
 	OnSpinEnd(FeatureContext)
+	GetSymbols(FeatureContext) []*symbol.SymbolDef
 }
 
 type BaseFeature struct {
@@ -30,6 +31,10 @@ type BaseFeature struct {
 }
 
 // --- Implementing the Interface Methods ---
+
+func (f *BaseFeature) GetSymbols(ctx FeatureContext) []*symbol.SymbolDef {
+	return []*symbol.SymbolDef{}
+}
 
 // Init: Sets up the initial configuration
 func (f *BaseFeature) Init(ctx FeatureContext) {

@@ -1,0 +1,225 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Slot Engine Game Config",
+    "type": "object",
+    "required": [
+        "Cols",
+        "Rows",
+        "Symbols"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "Cols": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "Rows": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "Symbols": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/definitions/symbol"
+            }
+        },
+        "Features": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/feature"
+            }
+        }
+    },
+    "definitions": {
+        "symbol": {
+            "type": "object",
+            "required": [
+                "ID",
+                "Name",
+                "Payouts",
+                "WeightConfig"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "ID": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "Name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "Payouts": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "MatchesWith": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [ ]
+                },
+                "WeightConfig": {
+                    "$ref": "#/definitions/weightConfig"
+                }
+            }
+        },
+        "weightConfig": {
+            "type": "object",
+            "required": [
+                "FixedWeight"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "FixedWeight": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "Modifiers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/weightModifier"
+                    }
+                }
+            }
+        },
+        "weightModifier": {
+            "type": "object",
+            "required": [
+                "Type"
+            ],
+            "additionalProperties": true,
+            "properties": {
+                "Type": {
+                    "type": "string",
+                    "enum": [
+                        "ReelWeight",
+                        "CountWeight"
+                    ]
+                },
+                "ReelMultipliers": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "Scales": {
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "ReelWeight"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "ReelMultipliers"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "CountWeight"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "Scales"
+                        ]
+                    }
+                }
+            ]
+        },
+        "feature": {
+            "type": "object",
+            "required": [
+                "Type"
+            ],
+            "additionalProperties": true,
+            "properties": {
+                "Type": {
+                    "type": "string",
+                    "enum": [
+                        "EXPANDING_WILDS_FEATURE",
+                        "PAYLINES_FEATURE",
+                        "SCATTER_FEATURE"
+                    ]
+                },
+                "TargetSymbolID": {
+                    "type": "integer"
+                },
+                "FeatureSymbol": {
+                    "$ref": "#/definitions/symbol"
+                },
+                "Paylines": {
+                    "type": "array"
+                },
+                "ExcludeSymbolIDs": {
+                    "type": "array"
+                }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "EXPANDING_WILDS_FEATURE"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "TargetSymbolID"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "SCATTER_FEATURE"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "FeatureSymbol"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "PAYLINES_FEATURE"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "Paylines"
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

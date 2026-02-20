@@ -38,8 +38,11 @@ type jsonWeightModDTO struct {
 }
 
 type jsonFeatureDTO struct {
-	Type           string `json:"Type"`
-	TargetSymbolID int    `json:"TargetSymbolID,omitempty"`
+	Type             string        `json:"Type"`
+	TargetSymbolID   int           `json:"TargetSymbolID,omitempty"`
+	FeatureSymbol    jsonSymbolDTO `json:"FeatureSymbol"`
+	Paylines         [][]int       `json:"Paylines,omitempty"`
+	ExcludeSymbolIDs []int         `json:"ExcludeSymbolIDs,omitempty"`
 }
 
 func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
@@ -60,29 +63,7 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 
 	// A. Map Symbols and Modifiers
 	for _, sDTO := range dto.Symbols {
-		sym := &symbol.SymbolDef{
-			ID:          sDTO.ID,
-			Name:        sDTO.Name,
-			Payouts:     sDTO.Payouts,
-			MatchesWith: sDTO.MatchesWith,
-			WeightConfig: symbol.WeightConfig{
-				FixedWeight: sDTO.WeightConfig.FixedWeight,
-				Modifiers:   make([]symbol.WeightModifier, 0),
-			},
-		}
-
-		// Map Modifiers via Factory
-		for _, mDTO := range sDTO.WeightConfig.Modifiers {
-			switch mDTO.Type {
-			case "CountWeight":
-				sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.CountWeight{Scales: mDTO.Scales})
-			case "ReelWeight":
-				sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.ReelWeight{ReelMultipliers: mDTO.ReelMultipliers})
-			case "SameReelWeight":
-				sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.SameReelWeight{TargetSymbolID: mDTO.TargetSymbolID, Factor: mDTO.Factor})
-			}
-		}
-
+		sym := SymbolFronJson(sDTO)
 		config.Symbols = append(config.Symbols, sym)
 		symbolLookup[sym.ID] = sym
 	}
@@ -99,11 +80,42 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 			}
 			config.Features = append(config.Features, features.NewWildFeature(targetSym))
 		case "PAYLINES_FEATURE":
-			config.Features = append(config.Features, features.NewPaylineFeature())
+
+			config.Features = append(config.Features, features.NewPaylineFeature(fDTO.Paylines, fDTO.ExcludeSymbolIDs))
 		case "EXPANDING_WILDS_FEATURE":
 			config.Features = append(config.Features, features.NewExpandingWildsFeature(fDTO.TargetSymbolID))
+		case "SCATTER_FEATURE":
+			s := SymbolFronJson(fDTO.FeatureSymbol)
+			config.Features = append(config.Features, features.NewScatterFeature(s))
 		}
 	}
 
 	return config, nil
+}
+
+func SymbolFronJson(sDTO jsonSymbolDTO) *symbol.SymbolDef {
+	sym := &symbol.SymbolDef{
+		ID:          sDTO.ID,
+		Name:        sDTO.Name,
+		Payouts:     sDTO.Payouts,
+		MatchesWith: sDTO.MatchesWith,
+		WeightConfig: symbol.WeightConfig{
+			FixedWeight: sDTO.WeightConfig.FixedWeight,
+			Modifiers:   make([]symbol.WeightModifier, 0),
+		},
+	}
+
+	// Map Modifiers via Factory
+	for _, mDTO := range sDTO.WeightConfig.Modifiers {
+		switch mDTO.Type {
+		case "CountWeight":
+			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.CountWeight{Scales: mDTO.Scales})
+		case "ReelWeight":
+			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.ReelWeight{ReelMultipliers: mDTO.ReelMultipliers})
+		case "SameReelWeight":
+			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.SameReelWeight{TargetSymbolID: mDTO.TargetSymbolID, Factor: mDTO.Factor})
+		}
+	}
+
+	return sym
 }

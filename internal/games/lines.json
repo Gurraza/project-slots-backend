@@ -1,0 +1,122 @@
+{
+    "Cols": 5,
+    "Rows": 3,
+    "Symbols": [
+        {
+            "ID": 1,
+            "Name": "Cherry",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 2,
+            "Name": "Strawberry",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 3,
+            "Name": "Citrus",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 4,
+            "Name": "Orange",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 5,
+            "Name": "Banana",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 6,
+            "Name": "Bar1",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 7,
+            "Name": "Wild",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ "*" ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        }
+    ],
+    "Features": [
+        {
+            "Type": "EXPANDING_WILDS_FEATURE",
+            "TargetSymbolID": 7
+        },
+        {
+            "Type": "PAYLINES_FEATURE",
+            "Paylines": [
+                [ 0, 0, 0, 0, 0 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 2, 2, 2, 2, 2 ],
+                [ 0, 1, 2, 1, 0 ],
+                [ 2, 1, 0, 1, 2 ]
+            ],
+            "ExcludeSymbolIDs": [ 63 ]
+        },
+        {
+            "Type": "SCATTER_FEATURE",
+            "FeatureSymbol": {
+                "ID": 63,
+                "Name": "Scatter",
+                "Payouts": [ 0, 0, 0, 0, 0 ],
+                "MatchesWith": [ ],
+                "WeightConfig": {
+                    "FixedWeight": 100,
+                    "Modifiers": [
+                        { "Type": "CountWeight", "Scales": [ 100, 50, 20, 0 ] }
+                    ]
+                }
+            }
+        }
+    ]
+}

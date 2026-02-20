@@ -8,15 +8,23 @@ import (
 
 type PaylineFeature struct {
 	BaseFeature
-	Paylines [][]int
+	Paylines         [][]int
+	ExcludeSymbolIDs []int
+	excludeSet       map[int]struct{}
 }
 
-func NewPaylineFeature() *PaylineFeature {
+func NewPaylineFeature(paylines [][]int, excludeSymbolIds []int) *PaylineFeature {
+	set := make(map[int]struct{}, len(excludeSymbolIds))
+	for _, id := range excludeSymbolIds {
+		set[id] = struct{}{}
+	}
 	return &PaylineFeature{
 		BaseFeature: BaseFeature{
 			Type: "PAYLINES_FEATURE",
 		},
-		Paylines: GetPaylines(),
+		Paylines:         paylines, //GetPaylines(),
+		ExcludeSymbolIDs: excludeSymbolIds,
+		excludeSet:       set,
 	}
 }
 
@@ -46,17 +54,6 @@ func (f *PaylineFeature) OnGridIdle(ctx FeatureContext) bool {
 	}
 
 	return false
-}
-
-func GetPaylines() [][]int {
-	// Classic 5-reel, 3-row paylines
-	return [][]int{
-		{1, 1, 1, 1, 1}, // Line 1: middle
-		{0, 0, 0, 0, 0}, // Line 2: top
-		{2, 2, 2, 2, 2}, // Line 3: bottom
-		{0, 1, 2, 1, 0}, // Line 4: V-shaped
-		{2, 1, 0, 1, 2}, // Line 5: inverted V
-	}
 }
 
 type LineCheckResult struct {
@@ -96,7 +93,8 @@ func (f *PaylineFeature) checkLine(g *grid.Grid, linePath []int, symbols map[int
 	matchCount := 1
 	for i := 1; i < len(symbolInLine); i++ {
 		s := symbolInLine[i]
-		if baseSymbol.Compatible(s) {
+		_, ok := f.excludeSet[s.ID]
+		if baseSymbol.Compatible(s) && !ok {
 			matchCount++
 		} else {
 			break

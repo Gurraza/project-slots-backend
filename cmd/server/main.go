@@ -18,7 +18,7 @@ var linesGameConfig *engine.GameConfig
 // }
 
 func main() {
-	linesConfigPath := "internal/games/lines.config"
+	linesConfigPath := "internal/games/lines.json"
 	linesConfigJson, err := os.ReadFile(linesConfigPath)
 	if err != nil {
 		log.Fatalf("Critical Error: Could not read config file at %s: %v", linesConfigPath, err)
