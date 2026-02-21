@@ -13,11 +13,15 @@ type FeatureContext interface {
 	AddSymbol(symbolDef *symbol.SymbolDef)
 	GetRandomSymbol(grid *grid.Grid, col int, row int) *symbol.SymbolDef
 	PushTimeline(timelineEvent *timeline.TimelineEvent)
+	AddFeature(newFeature GameFeature)
+	RemoveFeature(featureType string)
+	Spin() []*timeline.TimelineEvent
 }
 
 // Feature is the interface all game mechanics must implement
 type GameFeature interface {
 	Init(FeatureContext)
+	GetType() string
 
 	OnSpinStart(FeatureContext)
 	OnGridEvaluate(FeatureContext) bool
@@ -57,4 +61,8 @@ func (f *BaseFeature) OnGridIdle(ctx FeatureContext) bool {
 
 func (f *BaseFeature) OnSpinEnd(ctx FeatureContext) {
 	// Post-game cleanup or stats logging
+}
+
+func (f *BaseFeature) GetType() string {
+	return f.Type
 }

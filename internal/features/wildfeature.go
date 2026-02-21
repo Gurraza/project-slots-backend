@@ -15,3 +15,7 @@ func NewWildFeature(s *symbol.SymbolDef) *WildFeature {
 		FeatureSymbol: s,
 	}
 }
+
+func (f *WildFeature) GetSymbols(ctx FeatureContext) []*symbol.SymbolDef {
+	return []*symbol.SymbolDef{f.FeatureSymbol}
+}

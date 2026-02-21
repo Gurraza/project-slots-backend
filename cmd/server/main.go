@@ -24,12 +24,10 @@ func main() {
 		log.Fatalf("Critical Error: Could not read config file at %s: %v", linesConfigPath, err)
 	}
 
-	c, err := engine.LoadConfigFromJSON(linesConfigJson)
+	linesGameConfig, err := engine.LoadConfigFromJSON(linesConfigJson)
 	if err != nil {
 		log.Fatalf("Critical Error: Failed to parse JSON config: %v", err)
 	}
-
-	linesGameConfig = c
 
 	// fmt.Println("Go server running on http://localhost:8080")
 	// http.HandleFunc("/api/play/lines", PlayLinesEndpointHandler)
@@ -39,9 +37,11 @@ func main() {
 	// }
 	for range 1 {
 		seed := rand.Int63()
+
 		fmt.Println("\nSeed:", seed)
-		gameState := engine.NewGameState(linesGameConfig, seed)
-		t := gameState.PlayRound()
+		// gameState := engine.NewGameState(linesGameConfig, seed)
+		// t := gameState.Spin()
+		t := linesGameConfig.PlayGame(seed)
 		PrintTimeline(t)
 		fmt.Println()
 	}
@@ -51,9 +51,16 @@ func PrintTimeline(t []*timeline.TimelineEvent) {
 	for i, e := range t {
 		fmt.Printf("Grid %d type "+e.Type+" win amount %.2f\n", i, e.WinAmount)
 
-		if e.Meta != nil {
-			fmt.Println(e.Meta)
-		}
+		// if e.Meta != nil {
+		// 	// MarshalIndent formats the JSON with newlines and spaces
+		// 	metaBytes, err := json.MarshalIndent(e.Meta, "", "  ")
+		// 	if err != nil {
+		// 		fmt.Printf("Meta JSON Error: %v\n", err)
+		// 	} else {
+		// 		// Convert the byte slice to a string to print characters instead of numbers
+		// 		fmt.Println(string(metaBytes))
+		// 	}
+		// }
 
 		g := e.GridSnapshot.Cells
 		if len(g) == 0 {

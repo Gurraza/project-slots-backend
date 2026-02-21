@@ -73,24 +73,23 @@
                     { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
                 ]
             }
-        },
-        {
-            "ID": 7,
-            "Name": "Wild",
-            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
-            "MatchesWith": [ "*" ],
-            "WeightConfig": {
-                "FixedWeight": 100,
-                "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
-                ]
-            }
         }
     ],
     "Features": [
         {
-            "Type": "EXPANDING_WILDS_FEATURE",
-            "TargetSymbolID": 7
+            "Type": "WILD_FEATURE",
+            "FeatureSymbol": {
+                "ID": 7,
+                "Name": "Wild",
+                "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+                "MatchesWith": [ "*" ],
+                "WeightConfig": {
+                    "FixedWeight": 100,
+                    "Modifiers": [
+                        { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                    ]
+                }
+            }
         },
         {
             "Type": "PAYLINES_FEATURE",
@@ -103,20 +102,28 @@
             ],
             "ExcludeSymbolIDs": [ 63 ]
         },
+
         {
-            "Type": "SCATTER_FEATURE",
+            "Type": "FREE_SPINS_FEATURE",
+            "FreeSpins": 5,
             "FeatureSymbol": {
                 "ID": 63,
                 "Name": "Scatter",
                 "Payouts": [ 0, 0, 0, 0, 0 ],
                 "MatchesWith": [ ],
                 "WeightConfig": {
-                    "FixedWeight": 100,
+                    "FixedWeight": 100000,
                     "Modifiers": [
-                        { "Type": "CountWeight", "Scales": [ 100, 50, 20, 0 ] }
+                        { "Type": "CountWeight", "Scales": [ 100, 100, 100, 0 ] }
                     ]
                 }
-            }
+            },
+            "Features": [
+                {
+                    "Type": "EXPANDING_WILDS_FEATURE",
+                    "TargetSymbolID": 7
+                }
+            ]
         }
     ]
 }

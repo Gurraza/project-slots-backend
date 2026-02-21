@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/json"
-	"errors"
 	"slots/internal/features"
 	"slots/internal/symbol"
 )
@@ -38,11 +37,13 @@ type jsonWeightModDTO struct {
 }
 
 type jsonFeatureDTO struct {
-	Type             string        `json:"Type"`
-	TargetSymbolID   int           `json:"TargetSymbolID,omitempty"`
-	FeatureSymbol    jsonSymbolDTO `json:"FeatureSymbol"`
-	Paylines         [][]int       `json:"Paylines,omitempty"`
-	ExcludeSymbolIDs []int         `json:"ExcludeSymbolIDs,omitempty"`
+	Type             string           `json:"Type"`
+	TargetSymbolID   int              `json:"TargetSymbolID,omitempty"`
+	FeatureSymbol    jsonSymbolDTO    `json:"FeatureSymbol"`
+	Paylines         [][]int          `json:"Paylines,omitempty"`
+	ExcludeSymbolIDs []int            `json:"ExcludeSymbolIDs,omitempty"`
+	FreeSpins        int              `json:"FreeSpins,omitempty"`
+	Features         []jsonFeatureDTO `json:"Features,omitempty"`
 }
 
 func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
@@ -63,37 +64,47 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 
 	// A. Map Symbols and Modifiers
 	for _, sDTO := range dto.Symbols {
-		sym := SymbolFronJson(sDTO)
+		sym := SymbolFromJSON(sDTO)
 		config.Symbols = append(config.Symbols, sym)
 		symbolLookup[sym.ID] = sym
 	}
 
 	// B. Map Features via Factory
 	for _, fDTO := range dto.Features {
-		switch fDTO.Type {
-		case "CLUSTER_FEATURE":
-			config.Features = append(config.Features, features.NewClusterFeature())
-		case "WILD_FEATURE":
-			targetSym, exists := symbolLookup[fDTO.TargetSymbolID]
-			if !exists {
-				return nil, errors.New("WILD_FEATURE references missing symbol ID")
-			}
-			config.Features = append(config.Features, features.NewWildFeature(targetSym))
-		case "PAYLINES_FEATURE":
-
-			config.Features = append(config.Features, features.NewPaylineFeature(fDTO.Paylines, fDTO.ExcludeSymbolIDs))
-		case "EXPANDING_WILDS_FEATURE":
-			config.Features = append(config.Features, features.NewExpandingWildsFeature(fDTO.TargetSymbolID))
-		case "SCATTER_FEATURE":
-			s := SymbolFronJson(fDTO.FeatureSymbol)
-			config.Features = append(config.Features, features.NewScatterFeature(s))
+		f := FeatureFromJSON(fDTO, symbolLookup)
+		if f != nil {
+			config.Features = append(config.Features, f)
 		}
 	}
 
 	return config, nil
 }
 
-func SymbolFronJson(sDTO jsonSymbolDTO) *symbol.SymbolDef {
+func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*symbol.SymbolDef) features.GameFeature {
+	switch fDTO.Type {
+	case "CLUSTER_FEATURE":
+		return features.NewClusterFeature()
+	case "WILD_FEATURE":
+		return features.NewWildFeature(SymbolFromJSON(fDTO.FeatureSymbol))
+	case "PAYLINES_FEATURE":
+		return features.NewPaylineFeature(fDTO.Paylines, fDTO.ExcludeSymbolIDs)
+	case "EXPANDING_WILDS_FEATURE":
+		return features.NewExpandingWildsFeature(fDTO.TargetSymbolID)
+	case "FREE_SPINS_FEATURE":
+		s := SymbolFromJSON(fDTO.FeatureSymbol)
+		fs := make([]features.GameFeature, 0, len(fDTO.Features))
+		for _, f := range fDTO.Features {
+			nestedFeature := FeatureFromJSON(f, symbolLookup)
+			if nestedFeature != nil {
+				fs = append(fs, nestedFeature)
+			}
+		}
+		return features.NewFreeSpinsFeature(s, fDTO.FreeSpins, fs)
+	}
+	panic("Feature type unrecognized in loader.go, FeatureFromJSON")
+}
+
+func SymbolFromJSON(sDTO jsonSymbolDTO) *symbol.SymbolDef {
 	sym := &symbol.SymbolDef{
 		ID:          sDTO.ID,
 		Name:        sDTO.Name,
