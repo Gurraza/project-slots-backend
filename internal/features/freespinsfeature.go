@@ -1,18 +1,17 @@
 package features
 
 import (
-	"slots/internal/symbol"
-	"slots/internal/timeline"
+	"slots/internal/models"
 )
 
 type FreeSpinsFeature struct {
 	BaseFeature
-	FeatureSymbol *symbol.SymbolDef
+	FeatureSymbol *models.SymbolDef
 	FreeSpins     int
 	Features      []GameFeature
 }
 
-func NewFreeSpinsFeature(s *symbol.SymbolDef, freespins int, features []GameFeature) *FreeSpinsFeature {
+func NewFreeSpinsFeature(s *models.SymbolDef, freespins int, features []GameFeature) *FreeSpinsFeature {
 	return &FreeSpinsFeature{
 		BaseFeature: BaseFeature{
 			Type: "FREE_SPINS_FEATURE",
@@ -23,8 +22,8 @@ func NewFreeSpinsFeature(s *symbol.SymbolDef, freespins int, features []GameFeat
 	}
 }
 
-func (f *FreeSpinsFeature) GetSymbols(ctx FeatureContext) []*symbol.SymbolDef {
-	return []*symbol.SymbolDef{f.FeatureSymbol}
+func (f *FreeSpinsFeature) GetSymbols(ctx FeatureContext) []*models.SymbolDef {
+	return []*models.SymbolDef{f.FeatureSymbol}
 }
 
 func (f *FreeSpinsFeature) OnGridIdle(ctx FeatureContext) bool {
@@ -39,7 +38,7 @@ func (f *FreeSpinsFeature) OnGridIdle(ctx FeatureContext) bool {
 		}
 		ctx.RemoveFeature(f.Type)
 		for freeSpinsLeft := range f.FreeSpins {
-			ctx.PushTimeline(&timeline.TimelineEvent{
+			ctx.PushTimeline(&models.TimelineEvent{
 				Type:         f.Type,
 				GridSnapshot: ctx.GetGrid().Copy(),
 				WinAmount:    0,

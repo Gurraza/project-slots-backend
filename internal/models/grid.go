@@ -1,4 +1,4 @@
-package grid
+package models
 
 import (
 	"encoding/json"
@@ -11,8 +11,8 @@ type Grid struct {
 }
 
 type Point struct {
-	X int
-	Y int
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 func (g *Grid) Get(x int, y int) int {

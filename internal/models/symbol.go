@@ -1,8 +1,4 @@
-package symbol
-
-import (
-	"slots/internal/grid"
-)
+package models
 
 type SymbolDef struct {
 	ID           int
@@ -24,7 +20,7 @@ type WeightConfig struct {
 type WeightContext struct {
 	ReelIndex int
 	RowIndex  int
-	Grid      *grid.Grid
+	Grid      *Grid
 }
 
 func (s *SymbolDef) GetWeight(ctx *WeightContext) int {

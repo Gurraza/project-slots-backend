@@ -1,16 +1,15 @@
-package timeline
+package models
 
 import (
 	"fmt"
-	"slots/internal/grid"
 )
 
 type TimelineEvent struct {
-	Type           string     `json:"type"`
-	GridSnapshot   *grid.Grid `json:"grid"`
-	WinAmount      float64    `json:"win"`
-	TotalWinAmount float64    `json:"to_twin"`
-	Meta           any        `json:"meta"`
+	Type           string  `json:"type"`
+	GridSnapshot   *Grid   `json:"grid"`
+	WinAmount      float64 `json:"win"`
+	TotalWinAmount float64 `json:"totalWin"`
+	Meta           any     `json:"meta"`
 }
 
 type Timeline []*TimelineEvent

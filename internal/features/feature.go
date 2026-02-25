@@ -1,21 +1,19 @@
 package features
 
 import (
-	"slots/internal/grid"
-	"slots/internal/symbol"
-	"slots/internal/timeline"
+	"slots/internal/models"
 )
 
 type FeatureContext interface {
-	GetGrid() *grid.Grid
-	SetGrid(*grid.Grid)
-	GetSymbols() map[int]*symbol.SymbolDef
-	AddSymbol(symbolDef *symbol.SymbolDef)
-	GetRandomSymbol(grid *grid.Grid, col int, row int) *symbol.SymbolDef
-	PushTimeline(timelineEvent *timeline.TimelineEvent)
+	GetGrid() *models.Grid
+	SetGrid(*models.Grid)
+	GetSymbols() map[int]*models.SymbolDef
+	AddSymbol(symbolDef *models.SymbolDef)
+	GetRandomSymbol(grid *models.Grid, col int, row int) *models.SymbolDef
+	PushTimeline(timelineEvent *models.TimelineEvent)
 	AddFeature(newFeature GameFeature)
 	RemoveFeature(featureType string)
-	Spin() []*timeline.TimelineEvent
+	Spin() []*models.TimelineEvent
 }
 
 // Feature is the interface all game mechanics must implement
@@ -27,7 +25,7 @@ type GameFeature interface {
 	OnGridEvaluate(FeatureContext) bool
 	OnGridIdle(FeatureContext) bool
 	OnSpinEnd(FeatureContext)
-	GetSymbols(FeatureContext) []*symbol.SymbolDef
+	GetSymbols(FeatureContext) []*models.SymbolDef
 }
 
 type BaseFeature struct {
@@ -36,8 +34,8 @@ type BaseFeature struct {
 
 // --- Implementing the Interface Methods ---
 
-func (f *BaseFeature) GetSymbols(ctx FeatureContext) []*symbol.SymbolDef {
-	return []*symbol.SymbolDef{}
+func (f *BaseFeature) GetSymbols(ctx FeatureContext) []*models.SymbolDef {
+	return []*models.SymbolDef{}
 }
 
 // Init: Sets up the initial configuration

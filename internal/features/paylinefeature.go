@@ -1,9 +1,7 @@
 package features
 
 import (
-	"slots/internal/grid"
-	"slots/internal/symbol"
-	"slots/internal/timeline"
+	"slots/internal/models"
 )
 
 type PaylineFeature struct {
@@ -45,7 +43,7 @@ func (f *PaylineFeature) OnGridIdle(ctx FeatureContext) bool {
 		// 	"lines": winningLines,
 		// }
 		// extraData, _ := json.Marshal(eventData)
-		ctx.PushTimeline(&timeline.TimelineEvent{
+		ctx.PushTimeline(&models.TimelineEvent{
 			Type:         f.Type,
 			GridSnapshot: ctx.GetGrid().Copy(),
 			WinAmount:    roundWin,
@@ -57,26 +55,28 @@ func (f *PaylineFeature) OnGridIdle(ctx FeatureContext) bool {
 }
 
 type LineCheckResult struct {
-	LineID int          `json:"lineId"`
-	Coords []grid.Point `json:"coords"`
-	Payout float64      `json:"payout"`
-	Symbol string       `json:"symbol"`
+	LineID   int            `json:"lineId"`
+	Coords   []models.Point `json:"coords"`
+	Payout   float64        `json:"payout"`
+	Symbol   string         `json:"symbol"`
+	SymbolId int            `json:"symbolId"`
+	FullPath []int          `json:"fullPath"`
 }
 
-func (f *PaylineFeature) checkLine(g *grid.Grid, linePath []int, symbols map[int]*symbol.SymbolDef) *LineCheckResult {
+func (f *PaylineFeature) checkLine(g *models.Grid, linePath []int, symbols map[int]*models.SymbolDef) *LineCheckResult {
 
 	if len(linePath) != g.Cols {
 		return nil
 	}
 
-	symbolInLine := make([]*symbol.SymbolDef, len(linePath))
+	symbolInLine := make([]*models.SymbolDef, len(linePath))
 	for col, row := range linePath {
 		idHere := g.Get(col, row)
 		symbHere := symbols[idHere]
 		symbolInLine[col] = symbHere
 	}
 
-	var baseSymbol *symbol.SymbolDef
+	var baseSymbol *models.SymbolDef
 
 	for _, s := range symbolInLine {
 		if !s.IsWild() {
@@ -108,21 +108,24 @@ func (f *PaylineFeature) checkLine(g *grid.Grid, linePath []int, symbols map[int
 
 		for i := 0; i < matchCount; i++ {
 			s := symbolInLine[i]
-			if s.Payouts[matchCount-1] > payout {
+			if s.Payouts[matchCount-1] < payout {
 				payout = s.Payouts[matchCount-1]
 				payoutSymbol = s
 			}
 		}
 
-		coords := make([]grid.Point, matchCount)
+		coords := make([]models.Point, matchCount)
 		for i := 0; i < matchCount; i++ {
-			coords[i] = grid.Point{X: i, Y: linePath[i]}
+			coords[i] = models.Point{X: i, Y: linePath[i]}
 		}
 
 		return &LineCheckResult{
-			Coords: coords,
-			Payout: payout,
-			Symbol: payoutSymbol.Name,
+			Coords:   coords,
+			Payout:   payout,
+			Symbol:   payoutSymbol.Name,
+			SymbolId: payoutSymbol.ID,
+			LineID:   payoutSymbol.ID,
+			FullPath: linePath,
 		}
 
 	}

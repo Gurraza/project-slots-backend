@@ -1,13 +1,15 @@
 package features
 
-import "slots/internal/symbol"
+import (
+	"slots/internal/models"
+)
 
 type WildFeature struct {
 	BaseFeature
-	FeatureSymbol *symbol.SymbolDef
+	FeatureSymbol *models.SymbolDef
 }
 
-func NewWildFeature(s *symbol.SymbolDef) *WildFeature {
+func NewWildFeature(s *models.SymbolDef) *WildFeature {
 	return &WildFeature{
 		BaseFeature: BaseFeature{
 			Type: "WILD_FEATURE",
@@ -16,6 +18,6 @@ func NewWildFeature(s *symbol.SymbolDef) *WildFeature {
 	}
 }
 
-func (f *WildFeature) GetSymbols(ctx FeatureContext) []*symbol.SymbolDef {
-	return []*symbol.SymbolDef{f.FeatureSymbol}
+func (f *WildFeature) GetSymbols(ctx FeatureContext) []*models.SymbolDef {
+	return []*models.SymbolDef{f.FeatureSymbol}
 }

@@ -1,4 +1,4 @@
-package rng
+package models
 
 import (
 	"math/rand"

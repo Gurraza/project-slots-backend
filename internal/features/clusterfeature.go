@@ -1,9 +1,7 @@
 package features
 
 import (
-	"slots/internal/grid"
-	"slots/internal/symbol"
-	"slots/internal/timeline"
+	"slots/internal/models"
 )
 
 type ClusterFeature struct {
@@ -11,8 +9,8 @@ type ClusterFeature struct {
 }
 
 type Cluster struct {
-	Points []grid.Point
-	Symbol symbol.SymbolDef
+	Points []models.Point
+	Symbol models.SymbolDef
 }
 
 func NewClusterFeature() *ClusterFeature {
@@ -25,7 +23,7 @@ func NewClusterFeature() *ClusterFeature {
 
 func (f *ClusterFeature) OnGridIdle(ctx FeatureContext) bool {
 	clusters := FindClusters(ctx.GetGrid(), ctx.GetSymbols())
-	mergedCluster := make([]grid.Point, 0)
+	mergedCluster := make([]models.Point, 0)
 	for _, c := range clusters {
 		mergedCluster = append(mergedCluster, c.Points...)
 	}
@@ -38,11 +36,11 @@ func (f *ClusterFeature) OnGridIdle(ctx FeatureContext) bool {
 		replacements[i] = ctx.GetRandomSymbol(ctx.GetGrid(), i, 0).ID
 	}
 
-	ctx.SetGrid(grid.ExplodeAndCascade(ctx.GetGrid(), mergedCluster, replacements))
+	ctx.SetGrid(models.ExplodeAndCascade(ctx.GetGrid(), mergedCluster, replacements))
 
 	spinWinAmount := CalculatePayout(clusters)
 
-	ctx.PushTimeline(&timeline.TimelineEvent{
+	ctx.PushTimeline(&models.TimelineEvent{
 		Type:         "ExplodeAndCascade",
 		GridSnapshot: ctx.GetGrid().Copy(),
 		WinAmount:    spinWinAmount,
@@ -54,9 +52,9 @@ func (f *ClusterFeature) OnGridIdle(ctx FeatureContext) bool {
 	return true
 }
 
-func FindClusters(g *grid.Grid, symbols map[int]*symbol.SymbolDef) []Cluster {
+func FindClusters(g *models.Grid, symbols map[int]*models.SymbolDef) []Cluster {
 	// 1. Build a lookup map for efficient SymbolDef access by ID
-	defMap := make(map[int]*symbol.SymbolDef)
+	defMap := make(map[int]*models.SymbolDef)
 	for _, d := range symbols {
 		defMap[d.ID] = d
 	}
@@ -110,10 +108,10 @@ func FindClusters(g *grid.Grid, symbols map[int]*symbol.SymbolDef) []Cluster {
 			}
 
 			// Start a new cluster
-			currentCluster := []grid.Point{}
+			currentCluster := []models.Point{}
 
 			// Queue for BFS
-			queue := []grid.Point{{X: x, Y: y}}
+			queue := []models.Point{{X: x, Y: y}}
 			visited[x][y] = true
 
 			// Perform Flood Fill (BFS)
@@ -125,7 +123,7 @@ func FindClusters(g *grid.Grid, symbols map[int]*symbol.SymbolDef) []Cluster {
 				currentCluster = append(currentCluster, curr)
 
 				// Define 4-way directions (Up, Down, Left, Right)
-				dirs := []grid.Point{{X: 0, Y: -1}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: 1, Y: 0}}
+				dirs := []models.Point{{X: 0, Y: -1}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: 1, Y: 0}}
 
 				for _, d := range dirs {
 					nx, ny := curr.X+d.X, curr.Y+d.Y
@@ -139,7 +137,7 @@ func FindClusters(g *grid.Grid, symbols map[int]*symbol.SymbolDef) []Cluster {
 							// Compatibility Check
 							if areCompatible(currentVal, neighborVal) {
 								visited[nx][ny] = true
-								queue = append(queue, grid.Point{X: nx, Y: ny})
+								queue = append(queue, models.Point{X: nx, Y: ny})
 							}
 						}
 					}

@@ -3,7 +3,7 @@ package engine
 import (
 	"encoding/json"
 	"slots/internal/features"
-	"slots/internal/symbol"
+	"slots/internal/models"
 )
 
 // --- 1. Define Flat DTOs for JSON Parsing ---
@@ -55,12 +55,12 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 	config := &GameConfig{
 		Cols:     dto.Cols,
 		Rows:     dto.Rows,
-		Symbols:  make([]*symbol.SymbolDef, 0, len(dto.Symbols)),
+		Symbols:  make([]*models.SymbolDef, 0, len(dto.Symbols)),
 		Features: make([]features.GameFeature, 0, len(dto.Features)),
 	}
 
 	// Helper map to quickly find symbols by ID for feature injection
-	symbolLookup := make(map[int]*symbol.SymbolDef)
+	symbolLookup := make(map[int]*models.SymbolDef)
 
 	// A. Map Symbols and Modifiers
 	for _, sDTO := range dto.Symbols {
@@ -80,7 +80,7 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 	return config, nil
 }
 
-func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*symbol.SymbolDef) features.GameFeature {
+func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*models.SymbolDef) features.GameFeature {
 	switch fDTO.Type {
 	case "CLUSTER_FEATURE":
 		return features.NewClusterFeature()
@@ -104,15 +104,15 @@ func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*symbol.SymbolDef
 	panic("Feature type unrecognized in loader.go, FeatureFromJSON")
 }
 
-func SymbolFromJSON(sDTO jsonSymbolDTO) *symbol.SymbolDef {
-	sym := &symbol.SymbolDef{
+func SymbolFromJSON(sDTO jsonSymbolDTO) *models.SymbolDef {
+	sym := &models.SymbolDef{
 		ID:          sDTO.ID,
 		Name:        sDTO.Name,
 		Payouts:     sDTO.Payouts,
 		MatchesWith: sDTO.MatchesWith,
-		WeightConfig: symbol.WeightConfig{
+		WeightConfig: models.WeightConfig{
 			FixedWeight: sDTO.WeightConfig.FixedWeight,
-			Modifiers:   make([]symbol.WeightModifier, 0),
+			Modifiers:   make([]models.WeightModifier, 0),
 		},
 	}
 
@@ -120,11 +120,11 @@ func SymbolFromJSON(sDTO jsonSymbolDTO) *symbol.SymbolDef {
 	for _, mDTO := range sDTO.WeightConfig.Modifiers {
 		switch mDTO.Type {
 		case "CountWeight":
-			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.CountWeight{Scales: mDTO.Scales})
+			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &models.CountWeight{Scales: mDTO.Scales})
 		case "ReelWeight":
-			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.ReelWeight{ReelMultipliers: mDTO.ReelMultipliers})
+			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &models.ReelWeight{ReelMultipliers: mDTO.ReelMultipliers})
 		case "SameReelWeight":
-			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &symbol.SameReelWeight{TargetSymbolID: mDTO.TargetSymbolID, Factor: mDTO.Factor})
+			sym.WeightConfig.Modifiers = append(sym.WeightConfig.Modifiers, &models.SameReelWeight{TargetSymbolID: mDTO.TargetSymbolID, Factor: mDTO.Factor})
 		}
 	}
 

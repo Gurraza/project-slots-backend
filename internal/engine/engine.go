@@ -2,45 +2,42 @@ package engine
 
 import (
 	"slots/internal/features"
-	"slots/internal/grid"
-	"slots/internal/rng"
-	"slots/internal/symbol"
-	"slots/internal/timeline"
+	"slots/internal/models"
 )
 
 type GameConfig struct {
 	Cols     int
 	Rows     int
-	Symbols  []*symbol.SymbolDef
+	Symbols  []*models.SymbolDef
 	Features []features.GameFeature
 }
 
 type GameState struct {
-	Grid           *grid.Grid
+	Grid           *models.Grid
 	Config         *GameConfig
-	Symbols        map[int]*symbol.SymbolDef
-	RNG            rng.RNG
-	Timeline       []*timeline.TimelineEvent
+	Symbols        map[int]*models.SymbolDef
+	RNG            models.RNG
+	Timeline       []*models.TimelineEvent
 	ActiveFeatures []features.GameFeature
 }
 
-func (g *GameState) GetGrid() *grid.Grid {
+func (g *GameState) GetGrid() *models.Grid {
 	return g.Grid
 }
 
-func (g *GameState) AddSymbol(s *symbol.SymbolDef) {
+func (g *GameState) AddSymbol(s *models.SymbolDef) {
 	if g.Symbols[s.ID] != nil {
 		panic("Tried to add a symbol with id that already exists")
 	}
 	g.Symbols[s.ID] = s
 }
 
-func (g *GameState) GetSymbols() map[int]*symbol.SymbolDef {
+func (g *GameState) GetSymbols() map[int]*models.SymbolDef {
 	return g.Symbols
 }
 
-func (gs *GameState) GetRandomSymbol(grid *grid.Grid, col int, row int) *symbol.SymbolDef {
-	weightContext := symbol.WeightContext{
+func (gs *GameState) GetRandomSymbol(grid *models.Grid, col int, row int) *models.SymbolDef {
+	weightContext := models.WeightContext{
 		ReelIndex: col,
 		RowIndex:  row,
 		Grid:      grid,
@@ -63,7 +60,7 @@ func (gs *GameState) GetRandomSymbol(grid *grid.Grid, col int, row int) *symbol.
 	// return gs.Symbols[0]
 }
 
-func (g *GameState) PushTimeline(e *timeline.TimelineEvent) {
+func (g *GameState) PushTimeline(e *models.TimelineEvent) {
 	if len(g.Timeline) == 0 {
 		e.TotalWinAmount = 0
 	} else {
@@ -72,12 +69,12 @@ func (g *GameState) PushTimeline(e *timeline.TimelineEvent) {
 	g.Timeline = append(g.Timeline, e)
 }
 
-func (g *GameState) SetGrid(newGrid *grid.Grid) {
+func (g *GameState) SetGrid(newGrid *models.Grid) {
 	g.Grid = newGrid
 }
 
 func NewGameState(config *GameConfig, seed int64) *GameState {
-	symbs := make(map[int]*symbol.SymbolDef, len(config.Symbols))
+	symbs := make(map[int]*models.SymbolDef, len(config.Symbols))
 	for _, s := range config.Symbols {
 		symbs[s.ID] = s
 	}
@@ -86,11 +83,11 @@ func NewGameState(config *GameConfig, seed int64) *GameState {
 	copy(activeFeatures, config.Features)
 
 	return &GameState{
-		Grid:           grid.NewGrid(config.Cols, config.Rows),
+		Grid:           models.NewGrid(config.Cols, config.Rows),
 		Config:         config,
-		RNG:            rng.NewGoRNG(seed), // Initialize with the specific seed
+		RNG:            models.NewGoRNG(seed), // Initialize with the specific seed
 		Symbols:        symbs,
-		Timeline:       make([]*timeline.TimelineEvent, 0),
+		Timeline:       make([]*models.TimelineEvent, 0),
 		ActiveFeatures: activeFeatures,
 	}
 }
@@ -145,7 +142,7 @@ func (g *GameState) RemoveFeature(featureID string) {
 	g.ActiveFeatures = keptFeatures
 }
 
-func (config *GameConfig) PlayGame(seed int64) []*timeline.TimelineEvent {
+func (config *GameConfig) PlayGame(seed int64) []*models.TimelineEvent {
 	gameState := NewGameState(config, seed)
 	for _, f := range gameState.ActiveFeatures {
 		for _, s := range f.GetSymbols(gameState) {
@@ -154,18 +151,19 @@ func (config *GameConfig) PlayGame(seed int64) []*timeline.TimelineEvent {
 		f.Init(gameState)
 	}
 
-	gameState.PushTimeline(&timeline.TimelineEvent{
-		Type:         "SPIN_START",
-		GridSnapshot: gameState.Grid.Copy(),
-		WinAmount:    0,
-	})
 	t := gameState.Spin()
 
 	return t
 }
 
-func (gameState *GameState) Spin() []*timeline.TimelineEvent {
+func (gameState *GameState) Spin() []*models.TimelineEvent {
 	gameState.Grid = GenerateRandomGrid(gameState)
+
+	gameState.PushTimeline(&models.TimelineEvent{
+		Type:         "SPIN_START",
+		GridSnapshot: gameState.Grid.Copy(),
+		WinAmount:    0,
+	})
 
 	for _, f := range gameState.ActiveFeatures {
 		f.OnSpinStart(gameState)
@@ -210,9 +208,9 @@ func (gameState *GameState) Spin() []*timeline.TimelineEvent {
 	return gameState.Timeline
 }
 
-func GenerateRandomGrid(gameState *GameState) *grid.Grid {
+func GenerateRandomGrid(gameState *GameState) *models.Grid {
 	totalCells := gameState.Grid.Cols * gameState.Grid.Rows
-	newGrid := grid.NewGrid(gameState.Grid.Cols, gameState.Grid.Rows)
+	newGrid := models.NewGrid(gameState.Grid.Cols, gameState.Grid.Rows)
 
 	indices := make([]int, totalCells)
 	for i := range indices {
@@ -235,13 +233,6 @@ func GenerateRandomGrid(gameState *GameState) *grid.Grid {
 	return newGrid
 }
 
-func (g *GameState) GetSymbol(id int) *symbol.SymbolDef {
-	return g.Symbols[id] // Returns nil if not found, which is standard
-
-	// for _, s := range g.Symbols {
-	// 	if s.ID == id {
-	// 		return s
-	// 	}
-	// }
-	// return nil
+func (g *GameState) GetSymbol(id int) *models.SymbolDef {
+	return g.Symbols[id]
 }
