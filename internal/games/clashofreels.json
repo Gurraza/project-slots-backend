@@ -1,0 +1,120 @@
+{
+    "Cols": 7,
+    "Rows": 7,
+    "Symbols": [
+        {
+            "ID": 0,
+            "Name": "Barbarian",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 1,
+            "Name": "Archer",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 2,
+            "Name": "Goblin",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 3,
+            "Name": "Minion",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 4,
+            "Name": "Pekka",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 5,
+            "Name": "Gem",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 6,
+            "Name": "DarkElixir",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 7,
+            "Name": "Elixir",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        },
+        {
+            "ID": 8,
+            "Name": "Gold",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                ]
+            }
+        }
+    ],
+    "Features": [
+        {
+            "Type": "CLUSTER_FEATURE",
+            "ClusterSize": 4
+        }
+    ]
+}

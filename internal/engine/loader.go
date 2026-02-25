@@ -44,6 +44,7 @@ type jsonFeatureDTO struct {
 	ExcludeSymbolIDs []int            `json:"ExcludeSymbolIDs,omitempty"`
 	FreeSpins        int              `json:"FreeSpins,omitempty"`
 	Features         []jsonFeatureDTO `json:"Features,omitempty"`
+	ClusterSize      int              `json:"clusterSize,omitempty`
 }
 
 func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
@@ -83,7 +84,7 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*models.SymbolDef) features.GameFeature {
 	switch fDTO.Type {
 	case "CLUSTER_FEATURE":
-		return features.NewClusterFeature()
+		return features.NewClusterFeature(fDTO.ClusterSize, fDTO.ExcludeSymbolIDs)
 	case "WILD_FEATURE":
 		return features.NewWildFeature(SymbolFromJSON(fDTO.FeatureSymbol))
 	case "PAYLINES_FEATURE":

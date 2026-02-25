@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -9,16 +10,22 @@ type RNG interface {
 	Uint32() uint32
 	Range(max int) int
 	Intn(n int) int
+	GetSeed() int64
 }
 
 // GoRNG wraps math/rand for reproducibility
 type GoRNG struct {
-	r *rand.Rand
+	r    *rand.Rand
+	Seed int64 `json:"seed"`
 }
 
 // Constructor
 func NewGoRNG(seed int64) *GoRNG {
-	return &GoRNG{r: rand.New(rand.NewSource(seed))}
+	fmt.Println(seed)
+	return &GoRNG{
+		r:    rand.New(rand.NewSource(seed)),
+		Seed: seed,
+	}
 }
 
 func (g *GoRNG) Uint32() uint32 {
@@ -31,4 +38,8 @@ func (g *GoRNG) Intn(n int) int {
 
 func (g *GoRNG) Range(max int) int {
 	return g.r.Intn(max)
+}
+
+func (g *GoRNG) GetSeed() int64 {
+	return g.Seed
 }

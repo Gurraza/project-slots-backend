@@ -3,35 +3,57 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"slots/internal/engine"
+	"strconv"
 )
 
 var linesGameConfig *engine.GameConfig
+var clashofreelsConfig *engine.GameConfig
 
 func PlayLinesEndpointHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 	timeline := linesGameConfig.PlayGame(rand.Int63())
 	json.NewEncoder(w).Encode(timeline)
 }
 
-func main() {
-	linesConfigPath := "internal/games/lines.json"
-	linesConfigJson, err := os.ReadFile(linesConfigPath)
-	if err != nil {
-		log.Fatalf("Critical Error: Could not read config file at %s: %v", linesConfigPath, err)
-	}
+func PlayClashOfReelsEndpointHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+	// 1. Get query parameters
+	query := r.URL.Query()
+	seedStr := query.Get("seed")
 
-	linesGameConfig, err = engine.LoadConfigFromJSON(linesConfigJson)
-	if err != nil {
-		log.Fatalf("Critical Error: Failed to parse JSON config: %v", err)
+	var s int64
+	var err error
+
+	// 2. Parse seed if provided, otherwise generate random fallback
+	if seedStr != "" {
+		s, err = strconv.ParseInt(seedStr, 10, 64)
+		if err != nil {
+			http.Error(w, "Invalid seed format", http.StatusBadRequest)
+			return
+		}
+	} else {
+		s = rand.Int63()
 	}
+	fmt.Println("Actual seed:" + strconv.FormatInt(s, 10))
+
+	timeline := clashofreelsConfig.PlayGame(s)
+	json.NewEncoder(w).Encode(timeline)
+}
+
+func main() {
+	linesConfigJson, _ := os.ReadFile("internal/games/lines.json")
+	clashofreelsJson, _ := os.ReadFile("internal/games/clashofreels.json")
+
+	linesGameConfig, _ = engine.LoadConfigFromJSON(linesConfigJson)
+	clashofreelsConfig, _ = engine.LoadConfigFromJSON(clashofreelsJson)
 
 	fmt.Println("Go server running on http://localhost:8080")
 	http.HandleFunc("/play/lines", PlayLinesEndpointHandler)
+	http.HandleFunc("/play/clashofreels", PlayClashOfReelsEndpointHandler)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)

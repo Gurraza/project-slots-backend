@@ -3,6 +3,7 @@ package engine
 import (
 	"slots/internal/features"
 	"slots/internal/models"
+	"sort"
 )
 
 type GameConfig struct {
@@ -37,18 +38,24 @@ func (g *GameState) GetSymbols() map[int]*models.SymbolDef {
 }
 
 func (gs *GameState) GetRandomSymbol(grid *models.Grid, col int, row int) *models.SymbolDef {
+	keys := make([]int, 0, len(gs.Symbols))
+	for k := range gs.Symbols {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
 	weightContext := models.WeightContext{
 		ReelIndex: col,
 		RowIndex:  row,
 		Grid:      grid,
 	}
 	totalWeight := 0
-	for _, s := range gs.Symbols {
-		totalWeight += s.GetWeight(&weightContext)
+	for _, k := range keys {
+		totalWeight += gs.Symbols[k].GetWeight(&weightContext)
 	}
 	randomNmr := gs.RNG.Range(totalWeight)
 
-	for _, s := range gs.Symbols {
+	for _, k := range keys {
+		s := gs.Symbols[k]
 		w := s.GetWeight(&weightContext)
 		if randomNmr < w {
 			return s
@@ -163,6 +170,7 @@ func (gameState *GameState) Spin() []*models.TimelineEvent {
 		Type:         "SPIN_START",
 		GridSnapshot: gameState.Grid.Copy(),
 		WinAmount:    0,
+		Meta:         gameState.RNG.GetSeed(),
 	})
 
 	for _, f := range gameState.ActiveFeatures {
