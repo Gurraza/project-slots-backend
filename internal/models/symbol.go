@@ -1,11 +1,11 @@
 package models
 
 type SymbolDef struct {
-	ID           int
-	Name         string
-	WeightConfig WeightConfig
-	MatchesWith  []string
-	Payouts      []float64
+	ID           int          `json:"id"`
+	Name         string       `json:"name"`
+	WeightConfig WeightConfig `json:"weightConfig"`
+	MatchesWith  []string     `json:"matchesWith"`
+	Payouts      []float64    `json:"payouts"`
 }
 
 type WeightModifier interface {

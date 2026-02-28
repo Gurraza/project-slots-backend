@@ -29,7 +29,7 @@ type GameFeature interface {
 }
 
 type BaseFeature struct {
-	Type string
+	Type string `json:"type"`
 }
 
 // --- Implementing the Interface Methods ---

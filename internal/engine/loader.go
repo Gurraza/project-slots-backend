@@ -44,7 +44,7 @@ type jsonFeatureDTO struct {
 	ExcludeSymbolIDs []int            `json:"ExcludeSymbolIDs,omitempty"`
 	FreeSpins        int              `json:"FreeSpins,omitempty"`
 	Features         []jsonFeatureDTO `json:"Features,omitempty"`
-	ClusterSize      int              `json:"clusterSize,omitempty`
+	ClusterSize      int              `json:"clusterSize,omitempty"`
 }
 
 func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {

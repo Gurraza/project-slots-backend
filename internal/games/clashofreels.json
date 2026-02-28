@@ -1,4 +1,5 @@
 {
+    "ID": "clashofreels",
     "Cols": 7,
     "Rows": 7,
     "Symbols": [
@@ -28,18 +29,6 @@
         },
         {
             "ID": 2,
-            "Name": "Goblin",
-            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
-            "MatchesWith": [ ],
-            "WeightConfig": {
-                "FixedWeight": 100,
-                "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
-                ]
-            }
-        },
-        {
-            "ID": 3,
             "Name": "Minion",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
@@ -51,19 +40,7 @@
             }
         },
         {
-            "ID": 4,
-            "Name": "Pekka",
-            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
-            "MatchesWith": [ ],
-            "WeightConfig": {
-                "FixedWeight": 100,
-                "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
-                ]
-            }
-        },
-        {
-            "ID": 5,
+            "ID": 3,
             "Name": "Gem",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
@@ -75,7 +52,7 @@
             }
         },
         {
-            "ID": 6,
+            "ID": 4,
             "Name": "DarkElixir",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
@@ -87,19 +64,7 @@
             }
         },
         {
-            "ID": 7,
-            "Name": "Elixir",
-            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
-            "MatchesWith": [ ],
-            "WeightConfig": {
-                "FixedWeight": 100,
-                "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
-                ]
-            }
-        },
-        {
-            "ID": 8,
+            "ID": 5,
             "Name": "Gold",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
@@ -115,6 +80,22 @@
         {
             "Type": "CLUSTER_FEATURE",
             "ClusterSize": 4
+        },
+        {
+            "Type": "FREE_SPINS_FEATURE",
+            "FreeSpins": 5,
+            "FeatureSymbol": {
+                "ID": 63,
+                "Name": "Scatter",
+                "Payouts": [ 0, 0, 0, 0, 0 ],
+                "MatchesWith": [ ],
+                "WeightConfig": {
+                    "FixedWeight": 10,
+                    "Modifiers": [
+                        { "Type": "CountWeight", "Scales": [ 100, 25, 5, 0 ] }
+                    ]
+                }
+            }
         }
     ]
 }

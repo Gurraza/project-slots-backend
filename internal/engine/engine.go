@@ -7,10 +7,10 @@ import (
 )
 
 type GameConfig struct {
-	Cols     int
-	Rows     int
-	Symbols  []*models.SymbolDef
-	Features []features.GameFeature
+	Cols     int                    `json:"cols"`
+	Rows     int                    `json:"rows"`
+	Symbols  []*models.SymbolDef    `json:"symbols"`
+	Features []features.GameFeature `json:"features"`
 }
 
 type GameState struct {
@@ -208,11 +208,11 @@ func (gameState *GameState) Spin() []*models.TimelineEvent {
 		f.OnSpinEnd(gameState)
 	}
 
-	// gameState.PushTimeline(&timeline.TimelineEvent{
-	// 	Type:         "GAME_OVER",
-	// 	GridSnapshot: gameState.Grid.Copy(),
-	// 	WinAmount:    0,
-	// })
+	gameState.PushTimeline(&models.TimelineEvent{
+		Type:         "GAME_OVER",
+		GridSnapshot: gameState.Grid.Copy(),
+		WinAmount:    0,
+	})
 	return gameState.Timeline
 }
 

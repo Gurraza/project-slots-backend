@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -21,7 +20,6 @@ type GoRNG struct {
 
 // Constructor
 func NewGoRNG(seed int64) *GoRNG {
-	fmt.Println(seed)
 	return &GoRNG{
 		r:    rand.New(rand.NewSource(seed)),
 		Seed: seed,
