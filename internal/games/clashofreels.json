@@ -11,7 +11,8 @@
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
+                    { "Type": "SameReelWeight", "TargetSymbolID": 0, "Factor": 125 }
                 ]
             }
         },
@@ -23,7 +24,8 @@
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
+                    { "Type": "SameReelWeight", "TargetSymbolID": 1, "Factor": 125 }
                 ]
             }
         },
@@ -35,7 +37,8 @@
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
+                    { "Type": "SameReelWeight", "TargetSymbolID": 2, "Factor": 125 }
                 ]
             }
         },
@@ -47,7 +50,8 @@
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
+                    { "Type": "SameReelWeight", "TargetSymbolID": 3, "Factor": 125 }
                 ]
             }
         },
@@ -59,7 +63,8 @@
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
+                    { "Type": "SameReelWeight", "TargetSymbolID": 4, "Factor": 125 }
                 ]
             }
         },
@@ -71,7 +76,34 @@
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] }
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
+                    { "Type": "SameReelWeight", "TargetSymbolID": 5, "Factor": 125 }
+                ]
+            }
+        },
+        {
+            "ID": 6,
+            "Name": "Prince",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
+                    { "Type": "SameReelWeight", "TargetSymbolID": 5, "Factor": 125 }
+                ]
+            }
+        },
+        {
+            "ID": 63,
+            "Name": "Scatter",
+            "Payouts": [ 0, 0, 0, 0, 0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 0, 0, 0, 0, 100, 100, 100 ] },
+                    { "Type": "CountWeight", "Scales": [ 100, 100, 100, 0 ] }
                 ]
             }
         }
@@ -79,23 +111,13 @@
     "Features": [
         {
             "Type": "CLUSTER_FEATURE",
-            "ClusterSize": 4
+            "ClusterSize": 5
         },
         {
             "Type": "FREE_SPINS_FEATURE",
             "FreeSpins": 5,
-            "FeatureSymbol": {
-                "ID": 63,
-                "Name": "Scatter",
-                "Payouts": [ 0, 0, 0, 0, 0 ],
-                "MatchesWith": [ ],
-                "WeightConfig": {
-                    "FixedWeight": 10,
-                    "Modifiers": [
-                        { "Type": "CountWeight", "Scales": [ 100, 25, 5, 0 ] }
-                    ]
-                }
-            }
+            "TargetSymbolID": 64,
+            "Features": [ ]
         }
     ]
 }

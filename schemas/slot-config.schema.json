@@ -103,7 +103,8 @@
                     "type": "string",
                     "enum": [
                         "ReelWeight",
-                        "CountWeight"
+                        "CountWeight",
+                        "SameReelWeight"
                     ]
                 },
                 "ReelMultipliers": {
@@ -119,6 +120,12 @@
                         "type": "number",
                         "minimum": 0
                     }
+                },
+                "Factor": {
+                    "type": "number"
+                },
+                "TargetSymbol": {
+                    "type": "number"
                 }
             },
             "allOf": [
@@ -244,7 +251,7 @@
                     "then": {
                         "required": [
                             "FreeSpins",
-                            "FeatureSymbol"
+                            "TargetSymbolID"
                         ]
                     }
                 },

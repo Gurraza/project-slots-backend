@@ -6,28 +6,28 @@ import (
 
 type FreeSpinsFeature struct {
 	BaseFeature
-	FeatureSymbol *models.SymbolDef
-	FreeSpins     int
-	Features      []GameFeature
+	FeatureSymbolID int
+	FreeSpins       int
+	Features        []GameFeature
 }
 
-func NewFreeSpinsFeature(s *models.SymbolDef, freespins int, features []GameFeature) *FreeSpinsFeature {
+func NewFreeSpinsFeature(sid int, freespins int, features []GameFeature) *FreeSpinsFeature {
 	return &FreeSpinsFeature{
 		BaseFeature: BaseFeature{
 			Type: "FREE_SPINS_FEATURE",
 		},
-		FeatureSymbol: s,
-		Features:      features,
-		FreeSpins:     freespins,
+		FeatureSymbolID: sid,
+		Features:        features,
+		FreeSpins:       freespins,
 	}
 }
 
-func (f *FreeSpinsFeature) GetSymbols(ctx FeatureContext) []*models.SymbolDef {
-	return []*models.SymbolDef{f.FeatureSymbol}
-}
+// func (f *FreeSpinsFeature) GetSymbols(ctx FeatureContext) []*models.SymbolDef {
+// 	return []*models.SymbolDef{f.FeatureSymbol}
+// }
 
 func (f *FreeSpinsFeature) OnGridIdle(ctx FeatureContext) bool {
-	if len(ctx.GetGrid().Contain(f.FeatureSymbol.ID)) >= 3 {
+	if len(ctx.GetGrid().Contain(f.FeatureSymbolID)) >= 3 {
 		// ctx.PushTimeline(&timeline.TimelineEvent{
 		// 	Type:         "FREE_SPINS_FEATURE",
 		// 	GridSnapshot: ctx.GetGrid().Copy(),

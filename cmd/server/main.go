@@ -112,7 +112,7 @@ func main() {
 
 	if *simFlag {
 		// Run simulation and exit. Assuming a baseline bet size of 1.0.
-		RunSimulation(*gameFlag, 100_000)
+		RunSimulation(*gameFlag, 1_000_000)
 		return
 	}
 
@@ -120,7 +120,7 @@ func main() {
 	http.HandleFunc("/api/config", ConfigEndpointHandler)
 	http.HandleFunc("/api/play", PlayEndpointHandler)
 
-	fmt.Println("Go server running on http://192.168.68.102:8080")
+	fmt.Println("Go server running on http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}

@@ -92,7 +92,6 @@ func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*models.SymbolDef
 	case "EXPANDING_WILDS_FEATURE":
 		return features.NewExpandingWildsFeature(fDTO.TargetSymbolID)
 	case "FREE_SPINS_FEATURE":
-		s := SymbolFromJSON(fDTO.FeatureSymbol)
 		fs := make([]features.GameFeature, 0, len(fDTO.Features))
 		for _, f := range fDTO.Features {
 			nestedFeature := FeatureFromJSON(f, symbolLookup)
@@ -100,7 +99,7 @@ func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*models.SymbolDef
 				fs = append(fs, nestedFeature)
 			}
 		}
-		return features.NewFreeSpinsFeature(s, fDTO.FreeSpins, fs)
+		return features.NewFreeSpinsFeature(fDTO.TargetSymbolID, fDTO.FreeSpins, fs)
 	}
 	panic("Feature type unrecognized in loader.go, FeatureFromJSON")
 }
