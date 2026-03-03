@@ -2,6 +2,7 @@ package features
 
 import (
 	"slots/internal/models"
+	"sort"
 )
 
 type ClusterFeature struct {
@@ -11,14 +12,8 @@ type ClusterFeature struct {
 }
 
 type Cluster struct {
-	Points []ExplosionPoint
+	Points []models.Point
 	Symbol models.SymbolDef
-}
-
-type ExplosionPoint struct {
-	X             int `json:"x"`
-	Y             int `json:"y"`
-	ReplacementID int `json:"replacementId"`
 }
 
 func NewClusterFeature(clusterSize int, excludeSymbolIds []int) *ClusterFeature {
@@ -30,35 +25,31 @@ func NewClusterFeature(clusterSize int, excludeSymbolIds []int) *ClusterFeature 
 		ExcludeSymbolIDs: excludeSymbolIds,
 	}
 }
+
 func (f *ClusterFeature) OnGridIdle(ctx FeatureContext) bool {
 	clusters := FindClusters(ctx.GetGrid(), ctx.GetSymbols(), f.ClusterSize)
+
 	if len(clusters) == 0 {
 		return false
 	}
+	var mergedPoints []models.Point
 
-	var allPoints []models.Point
-	var allReplacements []int
-	var mergedExplosions []ExplosionPoint
-
-	for i := range clusters {
-		for j := range clusters[i].Points {
-			px := clusters[i].Points[j].X
-			py := clusters[i].Points[j].Y
-
-			// Generate replacement using correct spatial coordinates
-			repSymbol := ctx.GetRandomSymbol(ctx.GetGrid(), px, py)
-
-			// Map replacement ID directly to the point
-			clusters[i].Points[j].ReplacementID = repSymbol.ID
-
-			// Populate slices for legacy models.ExplodeAndCascade signature and Meta payload
-			allPoints = append(allPoints, models.Point{X: px, Y: py})
-			allReplacements = append(allReplacements, repSymbol.ID)
-			mergedExplosions = append(mergedExplosions, clusters[i].Points[j])
+	for _, cluster := range clusters {
+		for _, point := range cluster.Points {
+			mergedPoints = append(mergedPoints, point)
 		}
 	}
 
-	ctx.SetGrid(models.ExplodeAndCascade(ctx.GetGrid(), allPoints, allReplacements))
+	sort.Slice(mergedPoints, func(i, j int) bool {
+		if mergedPoints[i].X == mergedPoints[j].X {
+			return mergedPoints[i].Y < mergedPoints[j].Y
+		}
+		return mergedPoints[i].X < mergedPoints[j].X
+	})
+
+	explosions := ctx.GetGrid().ExplodeAndCascade(mergedPoints, func(x, y int) *models.SymbolDef {
+		return ctx.GetRandomSymbol(ctx.GetGrid(), x, y)
+	})
 
 	spinWinAmount := CalculatePayout(clusters)
 
@@ -68,42 +59,14 @@ func (f *ClusterFeature) OnGridIdle(ctx FeatureContext) bool {
 		WinAmount:    spinWinAmount,
 		Meta: map[string]interface{}{
 			// Send the unified structure to the frontend
-			"explosions": mergedExplosions,
+			"explosions": explosions,
 		},
 	})
 	return true
 }
 
-// func (f *ClusterFeature) OnGridIdle(ctx FeatureContext) bool {
-// 	clusters := FindClusters(ctx.GetGrid(), ctx.GetSymbols(), f.ClusterSize)
-// 	mergedCluster := make([]models.Point, 0)
-// 	for _, c := range clusters {
-// 		mergedCluster = append(mergedCluster, c.Points...)
-// 	}
-// 	if len(mergedCluster) == 0 {
-// 		return false
-// 	}
-
-// 	replacements := make([]int, len(mergedCluster))
-// 	for i := range replacements {
-// 		replacements[i] = ctx.GetRandomSymbol(ctx.GetGrid(), i, 0).ID
-// 	}
-
-// 	ctx.SetGrid(models.ExplodeAndCascade(ctx.GetGrid(), mergedCluster, replacements))
-
-// 	spinWinAmount := CalculatePayout(clusters)
-
-//		ctx.PushTimeline(&models.TimelineEvent{
-//			Type:         "EXPLODE_AND_CASCADE_FEATURE",
-//			GridSnapshot: ctx.GetGrid().Copy(),
-//			WinAmount:    spinWinAmount,
-//			Meta: map[string]interface{}{
-//				"points":       mergedCluster,
-//				"replacements": replacements,
-//			},
-//		})
-//		return true
-//	}
+// Takes a grid and symbolmap where id points to its definitoin and a clusterSize.
+// Returns a slice of clusters where each cluster has a slice of points and a symbolId of the cluster
 func FindClusters(g *models.Grid, symbols map[int]*models.SymbolDef, clusterSize int) []Cluster {
 	defMap := make(map[int]*models.SymbolDef)
 	for _, d := range symbols {
@@ -159,14 +122,14 @@ func FindClusters(g *models.Grid, symbols map[int]*models.SymbolDef, clusterSize
 			queue := []models.Point{{X: x, Y: y}}
 			localVisited[models.Point{X: x, Y: y}] = true
 
-			var currentCluster []ExplosionPoint
+			var currentCluster []models.Point
 			clusterSymbolID := startID
 
 			for len(queue) > 0 {
 				curr := queue[0]
 				queue = queue[1:]
 
-				currentCluster = append(currentCluster, ExplosionPoint{X: curr.X, Y: curr.Y})
+				currentCluster = append(currentCluster, models.Point{X: curr.X, Y: curr.Y})
 
 				dirs := []models.Point{{X: 0, Y: -1}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: 1, Y: 0}}
 				for _, d := range dirs {
@@ -207,127 +170,6 @@ func FindClusters(g *models.Grid, symbols map[int]*models.SymbolDef, clusterSize
 
 	return clusters
 }
-
-// func FindClusters(g *models.Grid, symbols map[int]*models.SymbolDef, clusterSize int) []Cluster {
-// 	// 1. Build a lookup map for efficient SymbolDef access by ID
-// 	defMap := make(map[int]*models.SymbolDef)
-// 	for _, d := range symbols {
-// 		defMap[d.ID] = d
-// 	}
-
-// 	// 2. Initialize visited matrix to keep track of processed cells
-// 	visited := make([][]bool, g.Cols)
-// 	for x := 0; x < g.Cols; x++ {
-// 		visited[x] = make([]bool, g.Rows)
-// 	}
-
-// 	var clusters []Cluster
-
-// 	// Helper function to check if two IDs are compatible
-// 	areCompatible := func(id1, id2 int) bool {
-// 		// Exact match is always a connection
-// 		if id1 == id2 {
-// 			return true
-// 		}
-
-// 		def1, exists1 := defMap[id1]
-// 		def2, exists2 := defMap[id2]
-
-// 		// If either definition is missing, we rely solely on exact ID match (checked above)
-// 		if !exists1 || !exists2 {
-// 			return false
-// 		}
-
-// 		// Check if def1 matches def2 (by specific name or wildcard)
-// 		for _, matchName := range def1.MatchesWith {
-// 			if matchName == "*" || matchName == def2.Name {
-// 				return true
-// 			}
-// 		}
-
-// 		// Check if def2 matches def1 (symmetric check)
-// 		for _, matchName := range def2.MatchesWith {
-// 			if matchName == "*" || matchName == def1.Name {
-// 				return true
-// 			}
-// 		}
-
-// 		return false
-// 	}
-
-// 	// 3. Iterate through every cell in the grid
-// 	for x := 0; x < g.Cols; x++ {
-// 		for y := 0; y < g.Rows; y++ {
-// 			// If already visited, skip
-// 			if visited[x][y] {
-// 				continue
-// 			}
-
-// 			// Start a new cluster
-// 			currentCluster := []models.Point{}
-
-// 			// Queue for BFS
-// 			queue := []models.Point{{X: x, Y: y}}
-// 			visited[x][y] = true
-
-// 			// Perform Flood Fill (BFS)
-// 			for len(queue) > 0 {
-// 				curr := queue[0]
-// 				queue = queue[1:] // Dequeue
-
-// 				// Add current point to the cluster
-// 				currentCluster = append(currentCluster, curr)
-
-// 				// Define 4-way directions (Up, Down, Left, Right)
-// 				dirs := []models.Point{{X: 0, Y: -1}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: 1, Y: 0}}
-
-// 				for _, d := range dirs {
-// 					nx, ny := curr.X+d.X, curr.Y+d.Y
-
-// 					// Boundary Check
-// 					if nx >= 0 && nx < g.Cols && ny >= 0 && ny < g.Rows {
-// 						if !visited[nx][ny] {
-// 							currentVal := g.Cells[curr.X][curr.Y]
-// 							neighborVal := g.Cells[nx][ny]
-
-// 							// Compatibility Check
-// 							if areCompatible(currentVal, neighborVal) {
-// 								visited[nx][ny] = true
-// 								queue = append(queue, models.Point{X: nx, Y: ny})
-// 							}
-// 						}
-// 					}
-// 				}
-// 			}
-
-// 			if len(currentCluster) >= clusterSize {
-// 				dominantSymbolID := g.Cells[x][y]
-
-// 				// Find the actual paying symbol, ignoring Wilds
-// 				for _, p := range currentCluster {
-// 					id := g.Cells[p.X][p.Y]
-// 					def := defMap[id]
-
-// 					// Check if the current dominant is a Wild (assuming Wilds have "*" in MatchesWith)
-// 					isCurrentWild := len(defMap[dominantSymbolID].MatchesWith) > 0 && defMap[dominantSymbolID].MatchesWith[0] == "*"
-// 					isNewWild := len(def.MatchesWith) > 0 && def.MatchesWith[0] == "*"
-
-// 					if isCurrentWild && !isNewWild {
-// 						dominantSymbolID = id
-// 						break // Found the paying symbol
-// 					}
-// 				}
-
-// 				clusters = append(clusters, Cluster{
-// 					Points: currentCluster,
-// 					Symbol: *defMap[dominantSymbolID],
-// 				})
-// 			}
-// 		}
-// 	}
-
-// 	return clusters
-// }
 
 // CalculatePayout takes a slice of clusters and returns the total float64 win amount.
 func CalculatePayout(clusters []Cluster) float64 {

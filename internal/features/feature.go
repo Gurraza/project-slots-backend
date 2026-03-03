@@ -14,6 +14,7 @@ type FeatureContext interface {
 	AddFeature(newFeature GameFeature)
 	RemoveFeature(featureType string)
 	Spin() []*models.TimelineEvent
+	GetRandomNumberN(n int) int
 }
 
 // Feature is the interface all game mechanics must implement
@@ -21,6 +22,7 @@ type GameFeature interface {
 	Init(FeatureContext)
 	GetType() string
 
+	OnGridGenerated(FeatureContext)
 	OnSpinStart(FeatureContext)
 	OnGridEvaluate(FeatureContext) bool
 	OnGridIdle(FeatureContext) bool
@@ -38,8 +40,12 @@ func (f *BaseFeature) GetSymbols(ctx FeatureContext) []*models.SymbolDef {
 	return []*models.SymbolDef{}
 }
 
-// Init: Sets up the initial configuration
 func (f *BaseFeature) Init(ctx FeatureContext) {
+	// Init: Sets up the initial configuration
+}
+
+func (f *BaseFeature) OnGridGenerated(ctx FeatureContext) {
+	// Before the spin event is sent but after the grid is generated
 }
 
 // OnSpinStart: Reset state before the reels move

@@ -172,6 +172,12 @@
                 "TargetSymbolID": {
                     "type": "integer"
                 },
+                "Targets": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "FeatureSymbol": {
                     "$ref": "#/definitions/symbol"
                 },
@@ -209,6 +215,21 @@
                     "then": {
                         "required": [
                             "TargetSymbolID"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "CASTLE"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "TargetSymbolID",
+                            "Targets"
                         ]
                     }
                 },

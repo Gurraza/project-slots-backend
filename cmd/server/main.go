@@ -74,9 +74,8 @@ func PlayEndpointHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		seed = rand.Int63()
+		seed = rand.Int63n(9007199254740991)
 	}
-
 	timeline := game.Config.PlayGame(seed)
 
 	w.Header().Set("Content-Type", "application/json")

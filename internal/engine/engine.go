@@ -163,8 +163,16 @@ func (config *GameConfig) PlayGame(seed int64) []*models.TimelineEvent {
 	return t
 }
 
+func (gameState *GameState) GetRandomNumberN(n int) int {
+	return gameState.RNG.Intn(n)
+}
+
 func (gameState *GameState) Spin() []*models.TimelineEvent {
 	gameState.Grid = GenerateRandomGrid(gameState)
+
+	for _, f := range gameState.ActiveFeatures {
+		f.OnGridGenerated(gameState)
+	}
 
 	gameState.PushTimeline(&models.TimelineEvent{
 		Type:         "SPIN_START",

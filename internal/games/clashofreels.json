@@ -5,110 +5,161 @@
     "Symbols": [
         {
             "ID": 0,
-            "Name": "Barbarian",
+            "Name": "troop1",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
-                    { "Type": "SameReelWeight", "TargetSymbolID": 0, "Factor": 125 }
                 ]
             }
         },
         {
             "ID": 1,
-            "Name": "Archer",
+            "Name": "troop2",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
-                    { "Type": "SameReelWeight", "TargetSymbolID": 1, "Factor": 125 }
                 ]
             }
         },
         {
             "ID": 2,
-            "Name": "Minion",
+            "Name": "troop3",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
-                    { "Type": "SameReelWeight", "TargetSymbolID": 2, "Factor": 125 }
                 ]
             }
         },
         {
             "ID": 3,
-            "Name": "Gem",
+            "Name": "troop4",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
-                    { "Type": "SameReelWeight", "TargetSymbolID": 3, "Factor": 125 }
                 ]
             }
         },
         {
             "ID": 4,
-            "Name": "DarkElixir",
+            "Name": "resource1",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
-                    { "Type": "SameReelWeight", "TargetSymbolID": 4, "Factor": 125 }
                 ]
             }
         },
         {
             "ID": 5,
-            "Name": "Gold",
+            "Name": "resource2",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
-                    { "Type": "SameReelWeight", "TargetSymbolID": 5, "Factor": 125 }
                 ]
             }
         },
         {
             "ID": 6,
-            "Name": "Prince",
+            "Name": "resource3",
             "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
                 "FixedWeight": 100,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 50, 50 ] },
-                    { "Type": "SameReelWeight", "TargetSymbolID": 5, "Factor": 125 }
                 ]
             }
         },
         {
             "ID": 63,
-            "Name": "Scatter",
+            "Name": "scatter",
             "Payouts": [ 0, 0, 0, 0, 0 ],
             "MatchesWith": [ ],
             "WeightConfig": {
-                "FixedWeight": 100,
+                "FixedWeight": 10,
                 "Modifiers": [
-                    { "Type": "ReelWeight", "ReelMultipliers": [ 0, 0, 0, 0, 100, 100, 100 ] },
+                    { "Type": "ReelWeight", "ReelMultipliers": [ 100, 100, 100, 100, 100, 100, 100 ] },
                     { "Type": "CountWeight", "Scales": [ 100, 100, 100, 0 ] }
                 ]
+            }
+        },
+        {
+            "ID": 60,
+            "Name": "wild",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ "*" ],
+            "WeightConfig": {
+                "FixedWeight": 25,
+                "Modifiers": [
+                    { "Type": "CountWeight", "Scales": [ 100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0 ] }
+                ]
+            }
+        },
+        {
+            "ID": 61,
+            "Name": "castle",
+            "Payouts": [ 0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 25,
+                "Modifiers": [
+                    { "Type": "CountWeight", "Scales": [ 100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0 ] }
+                ]
+            }
+        },
+        {
+            "ID": 10,
+            "Name": "supertroop1",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ "troop1" ],
+            "WeightConfig": {
+                "FixedWeight": 0
+            }
+        },
+        {
+            "ID": 11,
+            "Name": "supertroop2",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ "troop2" ],
+            "WeightConfig": {
+                "FixedWeight": 0
+            }
+        },
+        {
+            "ID": 12,
+            "Name": "supertroop3",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ "troop3" ],
+            "WeightConfig": {
+                "FixedWeight": 0
+            }
+        },
+        {
+            "ID": 13,
+            "Name": "supertroop4",
+            "Payouts": [ 0, 0, 2.5, 5.0, 10.0 ],
+            "MatchesWith": [ "troop4" ],
+            "WeightConfig": {
+                "FixedWeight": 0
             }
         }
     ],
     "Features": [
+        {
+            "Type": "CASTLE",
+            "TargetSymbolID": 61,
+            "Targets": [ 10, 11, 12, 13 ]
+        },
         {
             "Type": "CLUSTER_FEATURE",
             "ClusterSize": 5
@@ -118,6 +169,10 @@
             "FreeSpins": 5,
             "TargetSymbolID": 64,
             "Features": [ ]
+        },
+        {
+            "Type": "ANTICIPATION",
+            "TargetSymbolID": 63
         }
     ]
 }

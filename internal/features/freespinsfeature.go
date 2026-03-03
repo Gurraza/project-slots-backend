@@ -28,10 +28,9 @@ func NewFreeSpinsFeature(sid int, freespins int, features []GameFeature) *FreeSp
 
 func (f *FreeSpinsFeature) OnGridIdle(ctx FeatureContext) bool {
 	if len(ctx.GetGrid().Contain(f.FeatureSymbolID)) >= 3 {
-		// ctx.PushTimeline(&timeline.TimelineEvent{
-		// 	Type:         "FREE_SPINS_FEATURE",
-		// 	GridSnapshot: ctx.GetGrid().Copy(),
-		// })
+		ctx.PushTimeline(&models.TimelineEvent{
+			Type: "BONUS_GAME",
+		})
 		for _, newFeature := range f.Features {
 			ctx.AddFeature(newFeature)
 			newFeature.Init(ctx)

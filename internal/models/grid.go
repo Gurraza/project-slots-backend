@@ -15,6 +15,12 @@ type Point struct {
 	Y int `json:"y"`
 }
 
+type ExplosionPoint struct {
+	X             int `json:"x"`
+	Y             int `json:"y"`
+	ReplacementID int `json:"replacementId"`
+}
+
 func (g *Grid) Get(x int, y int) int {
 	if x >= 0 && x < g.Cols && y >= 0 && y < g.Rows {
 		return g.Cells[x][y]
@@ -55,23 +61,65 @@ func (g *Grid) Copy() *Grid {
 	return &Grid{Cols: g.Cols, Rows: g.Rows, Cells: newCells}
 }
 
+func (g *Grid) ExplodeAndCascade(points []Point, getRandomSymbol func(x, y int) *SymbolDef) []*ExplosionPoint {
+	explosions := make([]*ExplosionPoint, 0)
+	// Group replacements by column
+	replacementsByCol := make(map[int][]int)
+	for _, exp := range points {
+		if exp.X >= 0 && exp.X < g.Cols && exp.Y >= 0 && exp.Y < g.Rows {
+			g.Cells[exp.X][exp.Y] = -1
+			newSym := getRandomSymbol(exp.X, exp.Y)
+
+			explosions = append(explosions, &ExplosionPoint{
+				X:             exp.X,
+				Y:             exp.Y,
+				ReplacementID: newSym.ID,
+			})
+
+			replacementsByCol[exp.X] = append(replacementsByCol[exp.X], newSym.ID)
+		}
+	}
+
+	// For each column, apply gravity and replenish
+	for x := range g.Cols {
+		survivors := []int{}
+		for y := 0; y < g.Rows; y++ {
+			val := g.Cells[x][y]
+			if val != -1 {
+				survivors = append(survivors, val)
+			}
+		}
+
+		missingCount := g.Rows - len(survivors)
+		colReplacements := replacementsByCol[x]
+
+		if len(colReplacements) < missingCount {
+			panic("not enough replacement integers provided for column")
+		}
+
+		// Insert replacements from the top
+		for i := 0; i < missingCount; i++ {
+			g.Cells[x][i] = colReplacements[i]
+		}
+
+		// Insert survivors
+		for i := 0; i < len(survivors); i++ {
+			g.Cells[x][missingCount+i] = survivors[i]
+		}
+	}
+
+	return explosions
+}
+
 // ExplodeAndCascade removes points, collapses columns (gravity), and refills from the top.
-func ExplodeAndCascade(inputGrid *Grid, points []Point, replacements []int) *Grid {
-	// 1. Create a Deep Copy of the Grid to ensure immutability
+func eExplodeAndCascade(inputGrid *Grid, points []Point, replacements []int) *Grid {
 	newGrid := inputGrid.Copy()
 
-	// 2. Validation: Ensure we have enough replacements
-	// Note: If you allow clusters of same-value-but-different-points (overlapping),
-	// deduping points might be necessary here to get the exact count.
 	if len(replacements) < len(points) {
 		panic("not enough replacement integers provided for the number of exploded points")
 	}
 
-	// 3. Mark points for removal
-	// Using -1 to represent a "hole" temporarily.
-	// We use a map for O(1) lookups if the points slice is large,
-	// but for small clusters, direct iteration is fine.
-	// Here we assume standard removal logic.
+	// Check valid coordinate in grid
 	for _, p := range points {
 		if p.X >= 0 && p.X < newGrid.Cols && p.Y >= 0 && p.Y < newGrid.Rows {
 			newGrid.Cells[p.X][p.Y] = -1
@@ -80,9 +128,9 @@ func ExplodeAndCascade(inputGrid *Grid, points []Point, replacements []int) *Gri
 
 	replacementIndex := 0
 
-	// 4. Process each column to apply Gravity and Replenish
-	for x := 0; x < newGrid.Cols; x++ {
-		// Step A: Collect "surviving" blocks (non -1) in this column
+	// For each column, apply gravity and replenish
+	for x := range newGrid.Cols {
+		// Calculate amount of surviving ids
 		survivors := []int{}
 		for y := 0; y < newGrid.Rows; y++ {
 			val := newGrid.Cells[x][y]
@@ -91,17 +139,16 @@ func ExplodeAndCascade(inputGrid *Grid, points []Point, replacements []int) *Gri
 			}
 		}
 
-		// Step B: Calculate how many new blocks are needed at the top
+		// Amounts of -1
 		missingCount := newGrid.Rows - len(survivors)
 
-		// Step C: Rebuild the column
-		// 1. Add new replacements at the top
-		for i := 0; i < missingCount; i++ {
+		// Start by inserting the replacements
+		for i := range missingCount {
 			newGrid.Cells[x][i] = replacements[replacementIndex]
 			replacementIndex++
 		}
 
-		// 2. Append the surviving blocks below the new ones
+		// Then we insert the survivors
 		for i := 0; i < len(survivors); i++ {
 			newGrid.Cells[x][missingCount+i] = survivors[i]
 		}
@@ -110,12 +157,12 @@ func ExplodeAndCascade(inputGrid *Grid, points []Point, replacements []int) *Gri
 	return newGrid
 }
 
-func (g *Grid) Contain(id int) []Point {
-	positions := []Point{}
+func (g *Grid) Contain(id int) []*Point {
+	positions := []*Point{}
 	for i := range g.Cols {
 		for j := range g.Rows {
 			if g.Cells[i][j] == id {
-				positions = append(positions, Point{X: i, Y: j})
+				positions = append(positions, &Point{X: i, Y: j})
 			}
 		}
 	}
