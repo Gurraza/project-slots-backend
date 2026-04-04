@@ -21,9 +21,7 @@ var gameRegistry = make(map[string]Game)
 
 // handleCORS sets standard headers to allow frontend access.
 func handleCORS(w http.ResponseWriter) {
-	// w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	// w.Header().Set("Access-Control-Allow-Origin", "http://192.168.68.102:5173")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
@@ -43,7 +41,6 @@ func ConfigEndpointHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	// Encoding the struct enforces your json tags
 	json.NewEncoder(w).Encode(game.Config)
 }
 
@@ -107,15 +104,21 @@ func main() {
 	// Setup CLI flags
 	simFlag := flag.Bool("sim", false, "Run 1 million game simulation")
 	gameFlag := flag.String("game", "lines", "Game ID to simulate")
-	verifyFlag := flag.String("verify", "", "JSON array of seeds to verify") // NY FLAGGA
+	verifyFlag := flag.String("verify", "", "JSON array of seeds to verify")
+	cacheFlag := flag.String("cache", "", "JSON array of seeds to generate precomputed cache file")
 	flag.Parse()
+
+	if *cacheFlag != "" {
+		GenerateCache(*gameFlag, *cacheFlag)
+		return
+	}
 
 	if *verifyFlag != "" {
 		VerifySequence(*gameFlag, *verifyFlag)
 		return
 	}
+
 	if *simFlag {
-		// Run simulation and exit. Assuming a baseline bet size of 1.0.
 		RunSimulation(*gameFlag)
 		return
 	}
@@ -128,6 +131,44 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
+}
+
+// GenerateCache precomputes timelines for an array of seeds and saves them to a JSON file.
+func GenerateCache(gameID string, jsonInput string) {
+	game, exists := gameRegistry[gameID]
+	if !exists {
+		fmt.Printf("Game %s not found\n", gameID)
+		return
+	}
+
+	var seeds []int64
+	err := json.Unmarshal([]byte(jsonInput), &seeds)
+	if err != nil {
+		fmt.Printf("Failed to parse JSON seeds: %v\n", err)
+		return
+	}
+
+	cache := make(map[string]interface{})
+
+	for _, seed := range seeds {
+		timeline := game.Config.PlayGame(seed)
+		seedStr := strconv.FormatInt(seed, 10)
+		cache[seedStr] = timeline
+	}
+
+	fileData, err := json.MarshalIndent(cache, "", "  ")
+	if err != nil {
+		fmt.Printf("Failed to marshal cache data: %v\n", err)
+		return
+	}
+
+	err = os.WriteFile("precomputed_spins.json", fileData, 0644)
+	if err != nil {
+		fmt.Printf("Failed to write precomputed_spins.json: %v\n", err)
+		return
+	}
+
+	fmt.Println("Success: precomputed_spins.json generated.")
 }
 
 // VerifySequence tar en JSON-sträng med seeds, kör spelet och validerar resultatet.
@@ -171,10 +212,7 @@ func VerifySequence(gameID string, jsonInput string) {
 			winCount++
 		}
 
-		// Skriv endast ut vinster för att minska bruset (valfritt)
-		// if win > 0 {
 		fmt.Printf("Snurr %03d | Seed: %-16d | Win: %.2f\n", i+1, seed, win)
-		// }
 	}
 
 	totalCost := float64(len(seeds)) * betAmount
