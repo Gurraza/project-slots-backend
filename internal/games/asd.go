@@ -61,3 +61,15 @@ package games
 //                 ]
 //             }
 //         },
+
+// {
+//     "Type": "ANYWHERE_CASCADE_FEATURE",
+//     "ClusterSize": 7,
+//     "Priority": 5
+// }
+
+// {
+//     "Type": "ANYWHERE_CASCADE_FEATURE",
+//     "ClusterSize": 7,
+//     "Priority": 5
+// },

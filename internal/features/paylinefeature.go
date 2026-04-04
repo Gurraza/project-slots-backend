@@ -11,14 +11,15 @@ type PaylineFeature struct {
 	excludeSet       map[int]struct{}
 }
 
-func NewPaylineFeature(paylines [][]int, excludeSymbolIds []int) *PaylineFeature {
+func NewPaylineFeature(prio int, paylines [][]int, excludeSymbolIds []int) *PaylineFeature {
 	set := make(map[int]struct{}, len(excludeSymbolIds))
 	for _, id := range excludeSymbolIds {
 		set[id] = struct{}{}
 	}
 	return &PaylineFeature{
 		BaseFeature: BaseFeature{
-			Type: "PAYLINES_FEATURE",
+			Type:     "PAYLINES_FEATURE",
+			Priority: prio,
 		},
 		Paylines:         paylines, //GetPaylines(),
 		ExcludeSymbolIDs: excludeSymbolIds,

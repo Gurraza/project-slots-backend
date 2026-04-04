@@ -21,6 +21,7 @@ type FeatureContext interface {
 type GameFeature interface {
 	Init(FeatureContext)
 	GetType() string
+	GetPriority() int
 
 	OnGridGenerated(FeatureContext)
 	OnSpinStart(FeatureContext)
@@ -31,7 +32,8 @@ type GameFeature interface {
 }
 
 type BaseFeature struct {
-	Type string `json:"type"`
+	Type     string `json:"type"`
+	Priority int    `json:"priority"`
 }
 
 // --- Implementing the Interface Methods ---
@@ -69,4 +71,8 @@ func (f *BaseFeature) OnSpinEnd(ctx FeatureContext) {
 
 func (f *BaseFeature) GetType() string {
 	return f.Type
+}
+
+func (f *BaseFeature) GetPriority() int {
+	return f.Priority
 }

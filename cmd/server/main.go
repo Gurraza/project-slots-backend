@@ -77,7 +77,6 @@ func PlayEndpointHandler(w http.ResponseWriter, r *http.Request) {
 		seed = rand.Int63n(9007199254740991)
 	}
 	timeline := game.Config.PlayGame(seed)
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(timeline)
 }
@@ -103,15 +102,21 @@ func main() {
 	// 1. Initialize the registry
 	loadGame("lines", "internal/games/lines.json")
 	loadGame("clashofreels", "internal/games/clashofreels.json")
+	loadGame("neoncity", "internal/games/neoncity.json")
 
 	// Setup CLI flags
 	simFlag := flag.Bool("sim", false, "Run 1 million game simulation")
 	gameFlag := flag.String("game", "lines", "Game ID to simulate")
+	verifyFlag := flag.String("verify", "", "JSON array of seeds to verify") // NY FLAGGA
 	flag.Parse()
 
+	if *verifyFlag != "" {
+		VerifySequence(*gameFlag, *verifyFlag)
+		return
+	}
 	if *simFlag {
 		// Run simulation and exit. Assuming a baseline bet size of 1.0.
-		RunSimulation(*gameFlag, 1_000_000)
+		RunSimulation(*gameFlag)
 		return
 	}
 
@@ -123,4 +128,64 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
+}
+
+// VerifySequence tar en JSON-sträng med seeds, kör spelet och validerar resultatet.
+func VerifySequence(gameID string, jsonInput string) {
+	game, exists := gameRegistry[gameID]
+	if !exists {
+		fmt.Printf("Game %s not found\n", gameID)
+		return
+	}
+
+	// Tolka inmatad JSON-array
+	var seeds []int64
+	err := json.Unmarshal([]byte(jsonInput), &seeds)
+	if err != nil {
+		fmt.Printf("Failed to parse JSON seeds: %v\n", err)
+		return
+	}
+
+	var totalWin float64
+	var winCount, lossCount, ldwCount int
+	betAmount := 1.0
+
+	fmt.Printf("\n--- VERIFIERAR SEKRENS: %s ---\n", gameID)
+
+	for i, seed := range seeds {
+		timeline := game.Config.PlayGame(seed)
+
+		var win float64
+		if len(timeline) > 0 {
+			win = timeline[len(timeline)-1].TotalWinAmount
+		}
+
+		totalWin += win
+
+		// Kategorisera utfall
+		if win == 0 {
+			lossCount++
+		} else if win < betAmount {
+			ldwCount++
+		} else {
+			winCount++
+		}
+
+		// Skriv endast ut vinster för att minska bruset (valfritt)
+		// if win > 0 {
+		fmt.Printf("Snurr %03d | Seed: %-16d | Win: %.2f\n", i+1, seed, win)
+		// }
+	}
+
+	totalCost := float64(len(seeds)) * betAmount
+	netResult := totalWin - totalCost
+
+	// Summering
+	fmt.Println("\n--- VALIDERINGSRESULTAT ---")
+	fmt.Printf("Totalt antal snurr: %d\n", len(seeds))
+	fmt.Printf("Fördelning:         Losses: %d | LDWs: %d | Wins: %d\n", lossCount, ldwCount, winCount)
+	fmt.Printf("Total Kostnad:      %.2f kr\n", totalCost)
+	fmt.Printf("Total Vinst:        %.2f kr\n", totalWin)
+	fmt.Printf("Nettoresultat:      %.2f kr\n", netResult)
+	fmt.Println("---------------------------")
 }

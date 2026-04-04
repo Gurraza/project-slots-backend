@@ -168,3 +168,117 @@ func (g *Grid) Contain(id int) []*Point {
 	}
 	return positions
 }
+
+// Takes a grid and symbolmap where id points to its definitoin and a clusterSize.
+// Returns a slice of clusters where each cluster has a slice of points and a symbolId of the cluster
+func (g *Grid) FindClusters(symbols map[int]*SymbolDef, clusterSize int) []Cluster {
+	defMap := make(map[int]*SymbolDef)
+	for _, d := range symbols {
+		defMap[d.ID] = d
+	}
+
+	isWild := func(id int) bool {
+		def, exists := defMap[id]
+		return exists && len(def.MatchesWith) > 0 && def.MatchesWith[0] == "*"
+	}
+
+	isScatter := func(id int) bool {
+		def, exists := defMap[id]
+		return exists && def.Name == "scatter"
+	}
+
+	areCompatible := func(baseID, targetID int) bool {
+		if baseID == targetID {
+			return true
+		}
+		if isScatter(baseID) || isScatter(targetID) {
+			return false
+		}
+		baseDef, baseExists := defMap[baseID]
+		targetDef, targetExists := defMap[targetID]
+		if !baseExists || !targetExists {
+			return false
+		}
+		for _, m := range baseDef.MatchesWith {
+			if m == "*" || m == targetDef.Name {
+				return true
+			}
+		}
+		for _, m := range targetDef.MatchesWith {
+			if m == "*" || m == baseDef.Name {
+				return true
+			}
+		}
+		return false
+	}
+
+	// Global lock for all symbols (Standard and Wilds)
+	visited := make([][]bool, g.Cols)
+	for x := 0; x < g.Cols; x++ {
+		visited[x] = make([]bool, g.Rows)
+	}
+
+	var clusters []Cluster
+
+	// Scan left-to-right, top-to-bottom
+	for x := 0; x < g.Cols; x++ {
+		for y := 0; y < g.Rows; y++ {
+			startID := g.Cells[x][y]
+
+			// Skip if already claimed by a previous cluster, or if it is a Wild
+			if visited[x][y] || isWild(startID) {
+				continue
+			}
+
+			localVisited := make(map[Point]bool)
+			queue := []Point{{X: x, Y: y}}
+			localVisited[Point{X: x, Y: y}] = true
+
+			var currentCluster []Point
+			clusterSymbolID := startID
+
+			for len(queue) > 0 {
+				curr := queue[0]
+				queue = queue[1:]
+
+				currentCluster = append(currentCluster, Point{X: curr.X, Y: curr.Y})
+
+				dirs := []Point{{X: 0, Y: -1}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: 1, Y: 0}}
+				for _, d := range dirs {
+					nx, ny := curr.X+d.X, curr.Y+d.Y
+
+					if nx >= 0 && nx < g.Cols && ny >= 0 && ny < g.Rows {
+						np := Point{X: nx, Y: ny}
+
+						// Check local AND global visited state
+						if !localVisited[np] && !visited[nx][ny] {
+							neighborID := g.Cells[nx][ny]
+
+							if areCompatible(clusterSymbolID, neighborID) {
+								localVisited[np] = true
+								queue = append(queue, np)
+							}
+						}
+					}
+				}
+			}
+
+			if len(currentCluster) >= clusterSize {
+				// Lock ALL points in the cluster (First Claim)
+				for _, p := range currentCluster {
+					visited[p.X][p.Y] = true
+				}
+
+				clusters = append(clusters, Cluster{
+					Points: currentCluster,
+					Symbol: *defMap[clusterSymbolID],
+				})
+			} else {
+				// Lock the failed root to prevent redundant BFS cycles
+				visited[x][y] = true
+			}
+		}
+	}
+
+	return clusters
+}

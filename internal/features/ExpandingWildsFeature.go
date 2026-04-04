@@ -9,10 +9,11 @@ type ExpandingWildsFeature struct {
 	WildID int
 }
 
-func NewExpandingWildsFeature(wildId int) *ExpandingWildsFeature {
+func NewExpandingWildsFeature(prio int, wildId int) *ExpandingWildsFeature {
 	return &ExpandingWildsFeature{
 		BaseFeature: BaseFeature{
-			Type: "EXPANDING_WILDS_FEATURE",
+			Type:     "EXPANDING_WILDS_FEATURE",
+			Priority: prio,
 		},
 		WildID: wildId,
 	}

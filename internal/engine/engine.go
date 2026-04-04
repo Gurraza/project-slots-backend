@@ -37,6 +37,12 @@ func (g *GameState) GetSymbols() map[int]*models.SymbolDef {
 	return g.Symbols
 }
 
+func (g *GameState) SortFeatures() {
+	sort.SliceStable(g.ActiveFeatures, func(i, j int) bool {
+		return g.ActiveFeatures[i].GetPriority() > g.ActiveFeatures[j].GetPriority()
+	})
+}
+
 func (gs *GameState) GetRandomSymbol(grid *models.Grid, col int, row int) *models.SymbolDef {
 	keys := make([]int, 0, len(gs.Symbols))
 	for k := range gs.Symbols {
@@ -89,7 +95,7 @@ func NewGameState(config *GameConfig, seed int64) *GameState {
 	activeFeatures := make([]features.GameFeature, len(config.Features))
 	copy(activeFeatures, config.Features)
 
-	return &GameState{
+	gs := &GameState{
 		Grid:           models.NewGrid(config.Cols, config.Rows),
 		Config:         config,
 		RNG:            models.NewGoRNG(seed), // Initialize with the specific seed
@@ -97,10 +103,13 @@ func NewGameState(config *GameConfig, seed int64) *GameState {
 		Timeline:       make([]*models.TimelineEvent, 0),
 		ActiveFeatures: activeFeatures,
 	}
+	gs.SortFeatures()
+	return gs
 }
 
 func (g *GameState) AddFeature(f features.GameFeature) {
 	g.ActiveFeatures = append(g.ActiveFeatures, f)
+	g.SortFeatures()
 }
 
 // func (g *GameState) RemoveFeature(featureID string) {
@@ -159,6 +168,13 @@ func (config *GameConfig) PlayGame(seed int64) []*models.TimelineEvent {
 	}
 
 	t := gameState.Spin()
+	totwin := t[len(t)-1].TotalWinAmount
+	t = append(t, &models.TimelineEvent{
+		Type:           "GAME_OVER",
+		GridSnapshot:   gameState.Grid.Copy(),
+		WinAmount:      0,
+		TotalWinAmount: totwin,
+	})
 
 	return t
 }
@@ -188,7 +204,7 @@ func (gameState *GameState) Spin() []*models.TimelineEvent {
 	count := 0
 	for {
 		actionOccured := false
-		if count > 50 {
+		if count > 150 {
 			break
 		}
 
@@ -216,11 +232,6 @@ func (gameState *GameState) Spin() []*models.TimelineEvent {
 		f.OnSpinEnd(gameState)
 	}
 
-	gameState.PushTimeline(&models.TimelineEvent{
-		Type:         "GAME_OVER",
-		GridSnapshot: gameState.Grid.Copy(),
-		WinAmount:    0,
-	})
 	return gameState.Timeline
 }
 

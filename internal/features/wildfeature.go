@@ -9,10 +9,11 @@ type WildFeature struct {
 	FeatureSymbol *models.SymbolDef
 }
 
-func NewWildFeature(s *models.SymbolDef) *WildFeature {
+func NewWildFeature(prio int, s *models.SymbolDef) *WildFeature {
 	return &WildFeature{
 		BaseFeature: BaseFeature{
-			Type: "WILD_FEATURE",
+			Type:     "WILD_FEATURE",
+			Priority: prio,
 		},
 		FeatureSymbol: s,
 	}

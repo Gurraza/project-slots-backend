@@ -7,10 +7,11 @@ type AnticipationFeature struct {
 	FeatureSymbolID int
 }
 
-func NewAnticipationFeature(symbolId int) *AnticipationFeature {
+func NewAnticipationFeature(prio int, symbolId int) *AnticipationFeature {
 	return &AnticipationFeature{
 		BaseFeature: BaseFeature{
-			Type: "ANTICIPATION",
+			Type:     "ANTICIPATION",
+			Priority: prio,
 		},
 		FeatureSymbolID: symbolId,
 	}

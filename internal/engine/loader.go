@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"slots/internal/features"
 	"slots/internal/models"
+	"strconv"
 )
 
 // --- 1. Define Flat DTOs for JSON Parsing ---
@@ -38,6 +39,7 @@ type jsonWeightModDTO struct {
 
 type jsonFeatureDTO struct {
 	Type             string           `json:"Type"`
+	Priority         int              `json:"Priority"`
 	TargetSymbolID   int              `json:"TargetSymbolID,omitempty"`
 	FeatureSymbol    jsonSymbolDTO    `json:"FeatureSymbol"`
 	Paylines         [][]int          `json:"Paylines,omitempty"`
@@ -46,6 +48,7 @@ type jsonFeatureDTO struct {
 	Features         []jsonFeatureDTO `json:"Features,omitempty"`
 	ClusterSize      int              `json:"clusterSize,omitempty"`
 	Targets          []int            `json:"targets,omitempty"`
+	TargetMap        map[string]int   `json:"TargetMap,omitempty"`
 }
 
 func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
@@ -85,17 +88,19 @@ func LoadConfigFromJSON(jsonData []byte) (*GameConfig, error) {
 func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*models.SymbolDef) features.GameFeature {
 	switch fDTO.Type {
 	case "CLUSTER_FEATURE":
-		return features.NewClusterFeature(fDTO.ClusterSize, fDTO.ExcludeSymbolIDs)
+		return features.NewClusterFeature(fDTO.Priority, fDTO.ClusterSize, fDTO.ExcludeSymbolIDs)
 	case "WILD_FEATURE":
-		return features.NewWildFeature(SymbolFromJSON(fDTO.FeatureSymbol))
+		return features.NewWildFeature(fDTO.Priority, SymbolFromJSON(fDTO.FeatureSymbol))
 	case "PAYLINES_FEATURE":
-		return features.NewPaylineFeature(fDTO.Paylines, fDTO.ExcludeSymbolIDs)
+		return features.NewPaylineFeature(fDTO.Priority, fDTO.Paylines, fDTO.ExcludeSymbolIDs)
 	case "CASTLE":
-		return features.NewCastleFeature(fDTO.TargetSymbolID, fDTO.Targets)
+		return features.NewCastleFeature(fDTO.Priority, fDTO.TargetSymbolID, fDTO.Targets)
 	case "EXPANDING_WILDS_FEATURE":
-		return features.NewExpandingWildsFeature(fDTO.TargetSymbolID)
+		return features.NewExpandingWildsFeature(fDTO.Priority, fDTO.TargetSymbolID)
 	case "ANTICIPATION":
-		return features.NewAnticipationFeature(fDTO.TargetSymbolID)
+		return features.NewAnticipationFeature(fDTO.Priority, fDTO.TargetSymbolID)
+	case "ANYWHERE_CASCADE_FEATURE":
+		return features.NewAnywhereCascadeFeature(fDTO.Priority, fDTO.ClusterSize, fDTO.Targets)
 	case "FREE_SPINS_FEATURE":
 		fs := make([]features.GameFeature, 0, len(fDTO.Features))
 		for _, f := range fDTO.Features {
@@ -104,8 +109,20 @@ func FeatureFromJSON(fDTO jsonFeatureDTO, symbolLookup map[int]*models.SymbolDef
 				fs = append(fs, nestedFeature)
 			}
 		}
-		return features.NewFreeSpinsFeature(fDTO.TargetSymbolID, fDTO.FreeSpins, fs)
+		return features.NewFreeSpinsFeature(fDTO.Priority, fDTO.TargetSymbolID, fDTO.FreeSpins, fs)
+	case "TRIBUTE_HARVEST":
+		// Convert map[string]int to map[int]int
+		parsedTargets := make(map[int]int)
+		for k, v := range fDTO.TargetMap {
+			intKey, err := strconv.Atoi(k)
+			if err != nil {
+				panic("Invalid TargetMap key in TRIBUTE_HARVEST JSON, must be integer string")
+			}
+			parsedTargets[intKey] = v
+		}
+		return features.NewTributeHarvestFeature(fDTO.Priority, fDTO.ClusterSize, parsedTargets)
 	}
+
 	panic("Feature type unrecognized in loader.go, FeatureFromJSON")
 }
 

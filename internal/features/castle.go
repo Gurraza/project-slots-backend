@@ -10,17 +10,18 @@ type CastleFeature struct {
 	Targets         []int
 }
 
-func NewCastleFeature(symbolId int, targets []int) *CastleFeature {
+func NewCastleFeature(prio int, symbolId int, targets []int) *CastleFeature {
 	return &CastleFeature{
 		BaseFeature: BaseFeature{
-			Type: "CASTLE",
+			Type:     "CASTLE",
+			Priority: prio,
 		},
 		FeatureSymbolID: symbolId,
 		Targets:         targets,
 	}
 }
 
-func (f *CastleFeature) OnGridEvaluate(ctx FeatureContext) bool {
+func (f *CastleFeature) OnGridIdle(ctx FeatureContext) bool {
 	positions := ctx.GetGrid().Contain(f.FeatureSymbolID)
 	if len(positions) > 0 {
 		newId := f.Targets[ctx.GetRandomNumberN(len(f.Targets)-1)]

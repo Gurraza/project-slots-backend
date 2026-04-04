@@ -1,0 +1,124 @@
+{
+    "ID": "neoncity",
+    "Cols": 8,
+    "Rows": 8,
+    "Symbols": [
+        {
+            "ID": 1,
+            "Name": "symb1",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 2,
+            "Name": "symb2",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 3,
+            "Name": "symb3",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 4,
+            "Name": "symb4",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 5,
+            "Name": "symb5",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 6,
+            "Name": "symb6",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 7,
+            "Name": "symb7",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 8,
+            "Name": "symb8",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 9,
+            "Name": "symb9",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        },
+        {
+            "ID": 10,
+            "Name": "symb10",
+            "Payouts": [ 0, 0, 0, 0, 0, 0, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0 ],
+            "MatchesWith": [ ],
+            "WeightConfig": {
+                "FixedWeight": 100,
+                "Modifiers": [
+                ]
+            }
+        }
+    ],
+    "Features": [
+        {
+            "Type": "CLUSTER_FEATURE",
+            "ClusterSize": 5,
+            "Priority": 5
+        }
+    ]
+}
